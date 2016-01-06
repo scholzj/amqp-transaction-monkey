@@ -11,6 +11,9 @@ import javax.naming.NamingException;
  */
 public class TransactionMonkey {
     public static void main(String[] args) throws JMSException, NamingException, InterruptedException {
+        // TODO: Make rollback timeout/sleep configurable
+        // TODO: Crete the initial set of messages
+        // TODO: Make log level configurable
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
         System.setProperty("org.slf4j.simpleLogger.showDateTime", "true");
         System.setProperty("org.slf4j.simpleLogger.dateTimeFormat", "yyyy-MM-dd HH:mm:ss Z");
@@ -78,7 +81,7 @@ public class TransactionMonkey {
         TransactionRouter xaRollbackBtoA = factBtoA.createXARollback();
         xaRollbackBtoA.start();
 
-        Thread.sleep(1*60*60*1000);
+        Thread.sleep(12*60*60*1000);
 
         // Finish AMQP 1.0 router A->B
         amqp10RouterAtoB.finish();
