@@ -1,6 +1,6 @@
-package cz.scholz.amqp.transactionmonkey.jms.amqp010.xa;
+package cz.scholz.amqp.transactionmonkey.transactionrouter.jms.amqp010.xa;
 
-import cz.scholz.amqp.transactionmonkey.TransactionRouter;
+import cz.scholz.amqp.transactionmonkey.transactionrouter.TransactionRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

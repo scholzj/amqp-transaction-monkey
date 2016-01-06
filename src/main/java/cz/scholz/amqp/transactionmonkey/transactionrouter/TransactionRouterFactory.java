@@ -1,11 +1,11 @@
-package cz.scholz.amqp.transactionmonkey;
+package cz.scholz.amqp.transactionmonkey.transactionrouter;
 
-import cz.scholz.amqp.transactionmonkey.jms.amqp010.TransactionRollbackAmqp010;
-import cz.scholz.amqp.transactionmonkey.jms.amqp010.TransactionRouterAmqp010;
-import cz.scholz.amqp.transactionmonkey.jms.amqp010.xa.TransactionRollbackXA;
-import cz.scholz.amqp.transactionmonkey.jms.amqp010.xa.TransactionRouterXA;
-import cz.scholz.amqp.transactionmonkey.jms.amqp10.TransactionRollbackAmqp10;
-import cz.scholz.amqp.transactionmonkey.jms.amqp10.TransactionRouterAmqp10;
+import cz.scholz.amqp.transactionmonkey.transactionrouter.jms.amqp010.TransactionRollbackAmqp010;
+import cz.scholz.amqp.transactionmonkey.transactionrouter.jms.amqp010.TransactionRouterAmqp010;
+import cz.scholz.amqp.transactionmonkey.transactionrouter.jms.amqp010.xa.TransactionRollbackXA;
+import cz.scholz.amqp.transactionmonkey.transactionrouter.jms.amqp010.xa.TransactionRouterXA;
+import cz.scholz.amqp.transactionmonkey.transactionrouter.jms.amqp10.TransactionRollbackAmqp10;
+import cz.scholz.amqp.transactionmonkey.transactionrouter.jms.amqp10.TransactionRouterAmqp10;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;

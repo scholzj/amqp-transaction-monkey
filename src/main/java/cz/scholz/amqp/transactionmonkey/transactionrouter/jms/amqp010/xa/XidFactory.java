@@ -1,8 +1,7 @@
-package cz.scholz.amqp.transactionmonkey.jms.amqp010.xa;
+package cz.scholz.amqp.transactionmonkey.transactionrouter.jms.amqp010.xa;
 
 import javax.transaction.xa.Xid;
 import java.util.Random;
-import java.util.UUID;
 
 /**
  * Created by schojak on 6.1.16.

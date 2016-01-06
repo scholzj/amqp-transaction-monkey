@@ -1,7 +1,7 @@
 package cz.scholz.amqp.transactionmonkey;
 
-import cz.scholz.amqp.transactionmonkey.jms.amqp010.TransactionRouterAmqp010;
-import cz.scholz.amqp.transactionmonkey.jms.amqp10.TransactionRouterAmqp10;
+import cz.scholz.amqp.transactionmonkey.transactionrouter.TransactionRouter;
+import cz.scholz.amqp.transactionmonkey.transactionrouter.TransactionRouterFactory;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;

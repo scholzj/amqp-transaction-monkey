@@ -1,6 +1,6 @@
-package cz.scholz.amqp.transactionmonkey.jms;
+package cz.scholz.amqp.transactionmonkey.transactionrouter.jms;
 
-import cz.scholz.amqp.transactionmonkey.TransactionRouter;
+import cz.scholz.amqp.transactionmonkey.transactionrouter.TransactionRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,11 +12,10 @@ import java.util.Properties;
 /**
  * Created by schojak on 31.12.15.
  */
-abstract public class TransactionRollbackJms extends TransactionRouter {
+abstract public class TransactionRouterJms extends TransactionRouter {
     private int RECEIVE_TIMEOUT = 1000;
-    private int SLEEP_TIMEOUT = 1000;
 
-    final static Logger LOG = LoggerFactory.getLogger(TransactionRollbackJms.class);
+    final static Logger LOG = LoggerFactory.getLogger(TransactionRouterJms.class);
 
     protected Properties props;
     protected InitialContext ctx;
@@ -28,7 +27,7 @@ abstract public class TransactionRollbackJms extends TransactionRouter {
     protected int messageCounter = 0;
     protected boolean finish = false;
 
-    public TransactionRollbackJms(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException, JMSException {
+    public TransactionRouterJms(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException, JMSException {
         prepareProperties(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue);
         attachSource();
         attachTarget();
@@ -77,7 +76,7 @@ abstract public class TransactionRollbackJms extends TransactionRouter {
 
     public void run()
     {
-        LOG.info("Starting rolling back");
+        LOG.info("Starting routing");
 
         Message msg;
 
@@ -90,19 +89,13 @@ abstract public class TransactionRollbackJms extends TransactionRouter {
                 {
                     targetSender.send(msg);
 
-                    try {
-                        Thread.sleep(SLEEP_TIMEOUT);
-                    } catch (InterruptedException e) {
-                        LOG.error("Grr, my sleep was interrupted!", e);
-                    }
-
-                    targetSession.rollback();
-                    sourceSession.rollback();
+                    targetSession.commit();
+                    sourceSession.commit();
                     messageCounter++;
 
                     if (messageCounter % 1000 == 0)
                     {
-                        LOG.info(messageCounter + " messages rolled back");
+                        LOG.info(messageCounter + " messages routed");
                     }
                 }
                 else
@@ -114,8 +107,8 @@ abstract public class TransactionRollbackJms extends TransactionRouter {
             }
         }
 
-        LOG.info(messageCounter + " messages rolled back");
-        LOG.info("Finishing rolling back");
+        LOG.info(messageCounter + " messages routed");
+        LOG.info("Finishing routing");
 
         try {
             detachSource();

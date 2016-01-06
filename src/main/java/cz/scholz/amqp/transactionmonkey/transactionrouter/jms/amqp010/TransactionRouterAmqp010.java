@@ -1,8 +1,6 @@
-package cz.scholz.amqp.transactionmonkey.jms.amqp010;
+package cz.scholz.amqp.transactionmonkey.transactionrouter.jms.amqp010;
 
-import cz.scholz.amqp.transactionmonkey.jms.TransactionRollbackJms;
-import cz.scholz.amqp.transactionmonkey.jms.TransactionRouterJms;
-import cz.scholz.amqp.transactionmonkey.jms.amqp10.TransactionRollbackAmqp10;
+import cz.scholz.amqp.transactionmonkey.transactionrouter.jms.TransactionRouterJms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,10 +13,10 @@ import java.util.Properties;
 /**
  * Created by schojak on 31.12.15.
  */
-public class TransactionRollbackAmqp010 extends TransactionRollbackJms {
-    final static Logger LOG = LoggerFactory.getLogger(TransactionRollbackAmqp010.class);
+public class TransactionRouterAmqp010 extends TransactionRouterJms {
+    final static Logger LOG = LoggerFactory.getLogger(TransactionRouterAmqp010.class);
 
-    public TransactionRollbackAmqp010(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException, JMSException {
+    public TransactionRouterAmqp010(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException, JMSException {
         super(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue);
         LOG.info("Creating new AMQP 0-10 router");
     }

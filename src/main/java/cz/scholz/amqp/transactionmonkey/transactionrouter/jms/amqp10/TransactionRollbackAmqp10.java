@@ -1,7 +1,6 @@
-package cz.scholz.amqp.transactionmonkey.jms.amqp10;
+package cz.scholz.amqp.transactionmonkey.transactionrouter.jms.amqp10;
 
-import cz.scholz.amqp.transactionmonkey.jms.TransactionRollbackJms;
-import cz.scholz.amqp.transactionmonkey.jms.TransactionRouterJms;
+import cz.scholz.amqp.transactionmonkey.transactionrouter.jms.TransactionRollbackJms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
