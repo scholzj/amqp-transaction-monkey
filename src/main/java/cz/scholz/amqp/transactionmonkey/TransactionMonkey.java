@@ -21,6 +21,8 @@ public class TransactionMonkey {
     private TransactionRouterFactory factAtoB;
     private TransactionRouterFactory factBtoA;
 
+    private int sleepTime = 60*1000; // Default = 1 minute
+
     public static void main(String[] args) throws JMSException, NamingException, InterruptedException {
         // TODO: Make rollback timeout/sleep configurable
         // TODO: Crete the initial set of messages
@@ -34,19 +36,36 @@ public class TransactionMonkey {
             CommandLineParser parser = new DefaultParser();
             CommandLine line = parser.parse(getOptions(), args);
 
-            // Print help
-            if (line.hasOption("help")) {
-                printHelp();
-                return;
-            }
-
             // Configure logging
+            // Should be first to support logging in other methods
             if (line.hasOption("log-level"))
             {
                 configureLogging(line.getOptionValue("log-level"));
             }
             else {
                 configureLogging("info");
+            }
+
+            // Print help
+            if (line.hasOption("help")) {
+                printHelp();
+                return;
+            }
+
+            // Configure sleep time
+            if (line.hasOption("wait-time"))
+            {
+                String waitTime = line.getOptionValue("wait-time");
+
+                try {
+                    sleepTime = Integer.parseInt(waitTime);
+                    LOG.info("Waiting time set to " + sleepTime + " ms");
+                }
+                catch (NumberFormatException e)
+                {
+                    LOG.error("--wait-time option doesn't contain valid integer", e);
+                    System.exit(1);
+                }
             }
 
             // Collect broker details
@@ -136,6 +155,8 @@ public class TransactionMonkey {
 
                 System.exit(1);
             }
+
+
         }
         catch (ParseException e)
         {
@@ -148,8 +169,7 @@ public class TransactionMonkey {
         startAllRouters();
 
         try {
-            Thread.sleep(60*1000);
-            //Thread.sleep(12*60*60*1000);
+            Thread.sleep(sleepTime);
         } catch (InterruptedException e) {
             LOG.error("Sleep was interrupted", e);
         }
@@ -240,6 +260,8 @@ public class TransactionMonkey {
 
         opts.addOption(Option.builder().longOpt("enable-xa-amqp010-rollback").desc("Enable XA rollbacks using AMQP 0-10 protocol").build());
         opts.addOption(Option.builder().longOpt("amqp010-xa-rollback-wait-time").hasArg().argName("Time (ms)").desc("Set wait time before rollback").build());
+
+        opts.addOption(Option.builder().longOpt("wait-time").hasArg().argName("time (ms)").desc("How long should the routing proceed").build());
 
         opts.addOption(Option.builder().longOpt("feed-messages").desc("Feed messages").build());
 
