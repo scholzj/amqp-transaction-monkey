@@ -15,7 +15,7 @@ import java.util.List;
  * Created by schojak on 31.12.15.
  */
 public class TransactionMonkey {
-    final static Logger LOG = LoggerFactory.getLogger(TransactionMonkey.class);
+    static Logger LOG;
 
     private List<TransactionRouter> tr = new ArrayList<>();
     private TransactionRouterFactory factAtoB;
@@ -30,8 +30,6 @@ public class TransactionMonkey {
 
     public TransactionMonkey(String[] args)
     {
-
-
         try {
             CommandLineParser parser = new DefaultParser();
             CommandLine line = parser.parse(getOptions(), args);
@@ -40,12 +38,6 @@ public class TransactionMonkey {
             if (line.hasOption("help")) {
                 printHelp();
                 return;
-            }
-
-            // Feed messages
-            if (line.hasOption("feed-messages"))
-            {
-                feedMessages();
             }
 
             // Configure logging
@@ -57,7 +49,7 @@ public class TransactionMonkey {
                 configureLogging("info");
             }
 
-            // Configure factories
+            // Collect broker details
             String aHost = line.getOptionValue("first-broker-host");
             String aPort = line.getOptionValue("first-broker-port");
             String aUsername = line.getOptionValue("first-broker-username", null);
@@ -69,6 +61,13 @@ public class TransactionMonkey {
             String bPassword = line.getOptionValue("second-broker-password", null);
             String bQueue = line.getOptionValue("second-broker-queue");
 
+            // Feed messages
+            if (line.hasOption("feed-messages"))
+            {
+                feedMessages();
+            }
+
+            // Configure factories
             factAtoB = new TransactionRouterFactory(aHost, aPort, aUsername, aPassword, aQueue, bHost, bPort, bUsername, bPassword, bQueue);
             factBtoA = new TransactionRouterFactory(bHost, bPort, bUsername, bPassword, bQueue, aHost, aPort, aUsername, aPassword, aQueue);
 
@@ -126,7 +125,7 @@ public class TransactionMonkey {
                 // Stop the routers
                 stopAllRouters();
 
-                return;
+                System.exit(1);
             }
             catch (NamingException e)
             {
@@ -135,21 +134,22 @@ public class TransactionMonkey {
                 // Stop the routers
                 stopAllRouters();
 
-                return;
+                System.exit(1);
             }
         }
         catch (ParseException e)
         {
             System.out.println("Error parsing arguments: " + e.getMessage());
             printHelp();
-            return;
+            System.exit(1);
         }
 
         // Start the routers
         startAllRouters();
 
         try {
-            Thread.sleep(12*60*60*1000);
+            Thread.sleep(60*1000);
+            //Thread.sleep(12*60*60*1000);
         } catch (InterruptedException e) {
             LOG.error("Sleep was interrupted", e);
         }
@@ -162,6 +162,7 @@ public class TransactionMonkey {
     {
         LOG.info("Starting all routers");
         for (TransactionRouter router : tr) {
+            LOG.info("Starting router", router);
             router.start();
         }
     }
@@ -170,14 +171,25 @@ public class TransactionMonkey {
     {
         LOG.info("Stopping all routers");
         for (TransactionRouter router : tr) {
-            router.finish();
+            if (router.isAlive()) {
+                LOG.info("Stopping router", router);
+                router.finish();
 
-            try {
-                router.join();
-            } catch (InterruptedException e) {
-                LOG.error("Failed to join the router", e);
+                try {
+                    router.join();
+                } catch (InterruptedException e) {
+                    LOG.error("Failed to join the router", e);
+                }
+
+                tr.remove(router);
+            }
+            else
+            {
+                LOG.warn("Router is not alive", router);
+                tr.remove(router);
             }
         }
+        LOG.info("All routers are stopped");
     }
 
     private void configureLogging(String logLevel)
@@ -185,6 +197,7 @@ public class TransactionMonkey {
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", logLevel);
         System.setProperty("org.slf4j.simpleLogger.showDateTime", "true");
         System.setProperty("org.slf4j.simpleLogger.dateTimeFormat", "yyyy-MM-dd HH:mm:ss Z");
+        LOG = LoggerFactory.getLogger(TransactionMonkey.class);
     }
 
     private void feedMessages()
@@ -212,7 +225,7 @@ public class TransactionMonkey {
 
         opts.addOption(Option.builder().longOpt("second-broker-host").hasArg().argName("Hostname / IP address").desc("Hostname of the second broker").required().build());
         opts.addOption(Option.builder().longOpt("second-broker-port").hasArg().argName("Port").desc("Port number of the second broker").required().build());
-        opts.addOption(Option.builder().longOpt("second-broker-user").hasArg().argName("Username").desc("Username of the second broker").build());
+        opts.addOption(Option.builder().longOpt("second-broker-username").hasArg().argName("Username").desc("Username of the second broker").build());
         opts.addOption(Option.builder().longOpt("second-broker-password").hasArg().argName("Password").desc("Password of the second broker").build());
         opts.addOption(Option.builder().longOpt("second-broker-queue").hasArg().argName("Queue name").desc("Name of the queue which should be used on the second broker").required().build());
 
