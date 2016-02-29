@@ -12,5 +12,6 @@ import java.util.Properties;
  * Created by schojak on 31.12.15.
  */
 public abstract class TransactionRouter extends Thread {
-    abstract public void finish();
+    public abstract void finish();
+    public abstract void run();
 }
