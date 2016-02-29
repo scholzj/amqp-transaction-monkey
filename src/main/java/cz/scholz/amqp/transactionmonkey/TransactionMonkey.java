@@ -26,6 +26,7 @@ public class TransactionMonkey {
     public static void main(String[] args) throws JMSException, NamingException, InterruptedException {
         // TODO: Make rollback timeout/sleep configurable
         // TODO: Crete the initial set of messages
+        // TODO: Add option to end after routing X messages as a alternative to waiting time
 
         TransactionMonkey tm = new TransactionMonkey(args);
     }
