@@ -180,13 +180,10 @@ public class TransactionMonkey {
                 } catch (InterruptedException e) {
                     LOG.error("Failed to join the router", e);
                 }
-
-                tr.remove(router);
             }
             else
             {
                 LOG.warn("Router is not alive", router);
-                tr.remove(router);
             }
         }
         LOG.info("All routers are stopped");
