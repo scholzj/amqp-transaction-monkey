@@ -24,7 +24,6 @@ public class TransactionMonkey {
     private int sleepTime = 60*1000; // Default = 1 minute
 
     public static void main(String[] args) throws JMSException, NamingException, InterruptedException {
-        // TODO: Make rollback timeout/sleep configurable
         // TODO: Crete the initial set of messages
         // TODO: Add option to end after routing X messages as a alternative to waiting time
 
