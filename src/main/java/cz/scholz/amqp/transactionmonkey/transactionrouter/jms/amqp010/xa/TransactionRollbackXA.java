@@ -17,7 +17,6 @@ import java.util.Properties;
  */
 public class TransactionRollbackXA extends TransactionRouter {
     private int RECEIVE_TIMEOUT = 1000;
-    private int SLEEP_TIMEOUT = 1000;
 
     final static Logger LOG = LoggerFactory.getLogger(TransactionRollbackXA.class);
 
@@ -29,14 +28,22 @@ public class TransactionRollbackXA extends TransactionRouter {
     protected MessageConsumer sourceReceiver;
     protected MessageProducer targetSender;
 
+    protected int gapTime;
+    protected int waitTime;
+
     protected int messageCounter = 0;
     protected boolean finish = false;
 
-    public TransactionRollbackXA(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException, JMSException {
+    public TransactionRollbackXA(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue, int gapTime, int waitTime) throws NamingException, JMSException {
         LOG.info("Creating new AMQP 0-10 XA rollback");
+
         prepareProperties(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue);
+
         attachSource();
         attachTarget();
+
+        this.gapTime = gapTime;
+        this.waitTime = waitTime;
     }
 
     protected void prepareProperties(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException
@@ -140,9 +147,9 @@ public class TransactionRollbackXA extends TransactionRouter {
                 }
 
                 try {
-                    Thread.sleep(SLEEP_TIMEOUT);
+                    Thread.sleep(waitTime);
                 } catch (InterruptedException e) {
-                    LOG.error("Grr, my sleep was interrupted!", e);
+                    LOG.error("Waiting before end has been interrupted!", e);
                 }
 
                 xares1.end(xid, XAResource.TMSUCCESS);
@@ -152,14 +159,19 @@ public class TransactionRollbackXA extends TransactionRouter {
                 xares2.prepare(xid);
 
                 try {
-                    Thread.sleep(SLEEP_TIMEOUT);
+                    Thread.sleep(waitTime);
                 } catch (InterruptedException e) {
-                    LOG.error("Grr, my sleep was interrupted!", e);
+                    LOG.error("Waiting before commit has been interrupted!", e);
                 }
 
                 xares1.rollback(xid);
                 xares2.rollback(xid);
 
+                try {
+                    Thread.sleep(gapTime);
+                } catch (InterruptedException e) {
+                    LOG.error("Waiting before next transactions has been interrupted!", e);
+                }
             } catch (JMSException e) {
                 LOG.info("JMS Exception occurred ", e);
             } catch (XAException e) {

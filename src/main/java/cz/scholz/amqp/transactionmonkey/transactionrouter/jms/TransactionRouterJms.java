@@ -24,13 +24,20 @@ abstract public class TransactionRouterJms extends TransactionRouter {
     protected MessageConsumer sourceReceiver;
     protected MessageProducer targetSender;
 
+    protected int gapTime;
+    protected int waitTime;
+
     protected int messageCounter = 0;
     protected boolean finish = false;
 
-    public TransactionRouterJms(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException, JMSException {
+    public TransactionRouterJms(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue, int gapTime, int waitTime) throws NamingException, JMSException {
         prepareProperties(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue);
+
         attachSource();
         attachTarget();
+
+        this.gapTime = gapTime;
+        this.waitTime = waitTime;
     }
 
     protected abstract void prepareProperties(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException;
@@ -89,6 +96,12 @@ abstract public class TransactionRouterJms extends TransactionRouter {
                 {
                     targetSender.send(msg);
 
+                    try {
+                        Thread.sleep(waitTime);
+                    } catch (InterruptedException e) {
+                        LOG.error("Waiting before rollback has been interrupted!", e);
+                    }
+
                     targetSession.commit();
                     sourceSession.commit();
                     messageCounter++;
@@ -96,6 +109,12 @@ abstract public class TransactionRouterJms extends TransactionRouter {
                     if (messageCounter % 1000 == 0)
                     {
                         LOG.info(messageCounter + " messages routed");
+                    }
+
+                    try {
+                        Thread.sleep(gapTime);
+                    } catch (InterruptedException e) {
+                        LOG.error("Waiting before next transactions has been interrupted!", e);
                     }
                 }
                 else

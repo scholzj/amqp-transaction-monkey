@@ -14,7 +14,6 @@ import java.util.Properties;
  */
 abstract public class TransactionRollbackJms extends TransactionRouter {
     private int RECEIVE_TIMEOUT = 1000;
-    private int SLEEP_TIMEOUT = 1000;
 
     final static Logger LOG = LoggerFactory.getLogger(TransactionRollbackJms.class);
 
@@ -25,13 +24,20 @@ abstract public class TransactionRollbackJms extends TransactionRouter {
     protected MessageConsumer sourceReceiver;
     protected MessageProducer targetSender;
 
+    protected int gapTime;
+    protected int waitTime;
+
     protected int messageCounter = 0;
     protected boolean finish = false;
 
-    public TransactionRollbackJms(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException, JMSException {
+    public TransactionRollbackJms(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue, int gapTime, int waitTime) throws NamingException, JMSException {
         prepareProperties(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue);
+
         attachSource();
         attachTarget();
+
+        this.gapTime = gapTime;
+        this.waitTime = waitTime;
     }
 
     protected abstract void prepareProperties(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException;
@@ -91,9 +97,9 @@ abstract public class TransactionRollbackJms extends TransactionRouter {
                     targetSender.send(msg);
 
                     try {
-                        Thread.sleep(SLEEP_TIMEOUT);
+                        Thread.sleep(waitTime);
                     } catch (InterruptedException e) {
-                        LOG.error("Grr, my sleep was interrupted!", e);
+                        LOG.error("Waiting before rollback has been interrupted!", e);
                     }
 
                     targetSession.rollback();
@@ -103,6 +109,12 @@ abstract public class TransactionRollbackJms extends TransactionRouter {
                     if (messageCounter % 1000 == 0)
                     {
                         LOG.info(messageCounter + " messages rolled back");
+                    }
+
+                    try {
+                        Thread.sleep(gapTime);
+                    } catch (InterruptedException e) {
+                        LOG.error("Waiting before next transactions has been interrupted!", e);
                     }
                 }
                 else

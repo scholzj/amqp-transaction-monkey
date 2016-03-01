@@ -16,8 +16,8 @@ import java.util.Properties;
 public class TransactionRouterAmqp010 extends TransactionRouterJms {
     final static Logger LOG = LoggerFactory.getLogger(TransactionRouterAmqp010.class);
 
-    public TransactionRouterAmqp010(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException, JMSException {
-        super(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue);
+    public TransactionRouterAmqp010(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue, int gapTime, int waitTime) throws NamingException, JMSException {
+        super(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue, gapTime, waitTime);
         LOG.info("Creating new AMQP 0-10 router");
     }
 

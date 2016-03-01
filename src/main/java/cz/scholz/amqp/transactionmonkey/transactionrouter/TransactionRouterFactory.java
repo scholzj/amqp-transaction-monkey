@@ -38,28 +38,28 @@ public class TransactionRouterFactory {
         this.targetQueue = targetQueue;
     }
 
-    public TransactionRouter createAmqp10Router() throws JMSException, NamingException {
-        return new TransactionRouterAmqp10(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue);
+    public TransactionRouter createAmqp10Router(int gapTime, int waitTime) throws JMSException, NamingException {
+        return new TransactionRouterAmqp10(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue, gapTime, waitTime);
     }
 
-    public TransactionRouter createAmqp010Router() throws JMSException, NamingException {
-        return new TransactionRouterAmqp010(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue);
+    public TransactionRouter createAmqp010Router(int gapTime, int waitTime) throws JMSException, NamingException {
+        return new TransactionRouterAmqp010(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue, gapTime, waitTime);
     }
 
-    public TransactionRouter createAmqp10Rollback() throws JMSException, NamingException {
-        return new TransactionRollbackAmqp10(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue);
+    public TransactionRouter createAmqp10Rollback(int gapTime, int waitTime) throws JMSException, NamingException {
+        return new TransactionRollbackAmqp10(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue, gapTime, waitTime);
     }
 
-    public TransactionRouter createAmqp010Rollback() throws JMSException, NamingException {
-        return new TransactionRollbackAmqp010(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue);
+    public TransactionRouter createAmqp010Rollback(int gapTime, int waitTime) throws JMSException, NamingException {
+        return new TransactionRollbackAmqp010(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue, gapTime, waitTime);
     }
 
-    public TransactionRouter createXARouter() throws JMSException, NamingException {
-        return new TransactionRouterXA(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue);
+    public TransactionRouter createXARouter(int gapTime, int waitTime) throws JMSException, NamingException {
+        return new TransactionRouterXA(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue, gapTime, waitTime);
     }
 
-    public TransactionRouter createXARollback() throws JMSException, NamingException {
-        return new TransactionRollbackXA(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue);
+    public TransactionRouter createXARollback(int gapTime, int waitTime) throws JMSException, NamingException {
+        return new TransactionRollbackXA(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue, gapTime, waitTime);
     }
 
     public void setSourceHost(String sourceHost) {

@@ -28,14 +28,22 @@ public class TransactionRouterXA extends TransactionRouter {
     protected MessageConsumer sourceReceiver;
     protected MessageProducer targetSender;
 
+    protected int gapTime;
+    protected int waitTime;
+
     protected int messageCounter = 0;
     protected boolean finish = false;
 
-    public TransactionRouterXA(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException, JMSException {
+    public TransactionRouterXA(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue, int gapTime, int waitTime) throws NamingException, JMSException {
         LOG.info("Creating new AMQP 0-10 XA router");
+
         prepareProperties(sourceHost, sourcePort, sourceUsername, sourcePassword, sourceQueue, targetHost, targetPort, targetUsername, targetPassword, targetQueue);
+
         attachSource();
         attachTarget();
+
+        this.gapTime = gapTime;
+        this.waitTime = waitTime;
     }
 
     protected void prepareProperties(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException
@@ -138,15 +146,32 @@ public class TransactionRouterXA extends TransactionRouter {
                     LOG.trace("Didn't received any message within " + RECEIVE_TIMEOUT/1000 + "s");
                 }
 
+                try {
+                    Thread.sleep(waitTime);
+                } catch (InterruptedException e) {
+                    LOG.error("Waiting before end has been interrupted!", e);
+                }
+
                 xares1.end(xid, XAResource.TMSUCCESS);
                 xares2.end(xid, XAResource.TMSUCCESS);
 
                 xares1.prepare(xid);
                 xares2.prepare(xid);
 
+                try {
+                    Thread.sleep(waitTime);
+                } catch (InterruptedException e) {
+                    LOG.error("Waiting before rollback has been interrupted!", e);
+                }
+
                 xares1.commit(xid, false);
                 xares2.commit(xid, false);
 
+                try {
+                    Thread.sleep(gapTime);
+                } catch (InterruptedException e) {
+                    LOG.error("Waiting before next transactions has been interrupted!", e);
+                }
             } catch (JMSException e) {
                 LOG.info("JMS Exception occurred ", e);
             } catch (XAException e) {

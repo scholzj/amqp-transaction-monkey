@@ -38,7 +38,7 @@ public class TransactionMonkey {
             CommandLine line = parser.parse(getOptions(), args);
 
             // Configure logging
-            // Should be first to support logging in other methods
+            // Should be done first to support logging in other methods
             if (line.hasOption("log-level"))
             {
                 configureLogging(line.getOptionValue("log-level"));
@@ -96,58 +96,250 @@ public class TransactionMonkey {
                 // AMQP 1.0 routers
                 if (line.hasOption("enable-amqp10-routing")) {
                     LOG.info("Creating AMQP 1.0 routers");
-                    tr.add(factAtoB.createAmqp10Router());
-                    tr.add(factBtoA.createAmqp10Router());
+
+                    int gapTime = 0;
+                    int waitTime = 0;
+
+                    // Wait time
+                    if (line.hasOption("amqp10-routing-wait-time"))
+                    {
+                        String waitTimeOption = line.getOptionValue("amqp10-routing-wait-time");
+
+                        try {
+                            waitTime = Integer.parseInt(waitTimeOption);
+                            LOG.info("--amqp10-routing-wait-time set to " + sleepTime + " ms");
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            LOG.warn("--amqp10-routing-wait-time option doesn't contain valid integer", e);
+                        }
+                    }
+
+                    // Gap time
+                    if (line.hasOption("amqp10-routing-transaction-gap"))
+                    {
+                        String gapTimeOption = line.getOptionValue("amqp10-routing-transaction-gap");
+
+                        try {
+                            gapTime = Integer.parseInt(gapTimeOption);
+                            LOG.info("--amqp10-routing-transaction-gap set to " + sleepTime + " ms");
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            LOG.warn("--amqp10-routing-transaction-gap option doesn't contain valid integer", e);
+                        }
+                    }
+
+                    tr.add(factAtoB.createAmqp10Router(gapTime, waitTime));
+                    tr.add(factBtoA.createAmqp10Router(gapTime, waitTime));
                 }
 
                 // AMQP 0-10 routers
                 if (line.hasOption("enable-amqp010-routing")) {
                     LOG.info("Creating AMQP 0-10 routers");
-                    tr.add(factAtoB.createAmqp010Router());
-                    tr.add(factBtoA.createAmqp010Router());
+
+                    int gapTime = 0;
+                    int waitTime = 0;
+
+                    // Wait time
+                    if (line.hasOption("amqp010-routing-wait-time"))
+                    {
+                        String waitTimeOption = line.getOptionValue("amqp010-routing-wait-time");
+
+                        try {
+                            waitTime = Integer.parseInt(waitTimeOption);
+                            LOG.info("--amqp010-routing-wait-time set to " + sleepTime + " ms");
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            LOG.warn("--amqp010-routing-wait-time option doesn't contain valid integer", e);
+                        }
+                    }
+
+                    // Gap time
+                    if (line.hasOption("amqp010-routing-transaction-gap"))
+                    {
+                        String gapTimeOption = line.getOptionValue("amqp010-routing-transaction-gap");
+
+                        try {
+                            gapTime = Integer.parseInt(gapTimeOption);
+                            LOG.info("--amqp010-routing-transaction-gap set to " + sleepTime + " ms");
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            LOG.warn("--amqp010-routing-transaction-gap option doesn't contain valid integer", e);
+                        }
+                    }
+
+                    tr.add(factAtoB.createAmqp010Router(gapTime, waitTime));
+                    tr.add(factBtoA.createAmqp010Router(gapTime, waitTime));
                 }
 
                 // AMQP 1.0 rollbacks
                 if (line.hasOption("enable-amqp10-rollback")) {
-                    // TODO: add waiting times support
                     LOG.info("Creating AMQP 1.0 rollbacks");
-                    tr.add(factAtoB.createAmqp10Rollback());
-                    tr.add(factBtoA.createAmqp10Rollback());
+
+                    int gapTime = 0;
+                    int waitTime = 0;
+
+                    // Wait time
+                    if (line.hasOption("amqp10-rollback-wait-time"))
+                    {
+                        String waitTimeOption = line.getOptionValue("amqp10-rollback-wait-time");
+
+                        try {
+                            waitTime = Integer.parseInt(waitTimeOption);
+                            LOG.info("--amqp10-rollback-wait-time set to " + sleepTime + " ms");
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            LOG.warn("--amqp10-rollback-wait-time option doesn't contain valid integer", e);
+                        }
+                    }
+
+                    // Gap time
+                    if (line.hasOption("amqp10-rollback-transaction-gap"))
+                    {
+                        String gapTimeOption = line.getOptionValue("amqp10-rollback-transaction-gap");
+
+                        try {
+                            gapTime = Integer.parseInt(gapTimeOption);
+                            LOG.info("--amqp10-rollback-transaction-gap set to " + sleepTime + " ms");
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            LOG.warn("--amqp10-rollback-transaction-gap option doesn't contain valid integer", e);
+                        }
+                    }
+
+                    tr.add(factAtoB.createAmqp10Rollback(gapTime, waitTime));
+                    tr.add(factBtoA.createAmqp10Rollback(gapTime, waitTime));
                 }
 
                 // AMQP 0-10 rollbacks
                 if (line.hasOption("enable-amqp010-rollback")) {
-                    // TODO: add waiting times support
                     LOG.info("Creating AMQP 0-10 rollbacks");
-                    tr.add(factAtoB.createAmqp010Rollback());
-                    tr.add(factBtoA.createAmqp010Rollback());
+
+                    int gapTime = 0;
+                    int waitTime = 0;
+
+                    // Wait time
+                    if (line.hasOption("amqp010-rollback-wait-time"))
+                    {
+                        String waitTimeOption = line.getOptionValue("amqp010-rollback-wait-time");
+
+                        try {
+                            waitTime = Integer.parseInt(waitTimeOption);
+                            LOG.info("--amqp010-rollback-wait-time set to " + sleepTime + " ms");
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            LOG.warn("--amqp010-rollback-wait-time option doesn't contain valid integer", e);
+                        }
+                    }
+
+                    // Gap time
+                    if (line.hasOption("amqp010-rollback-transaction-gap"))
+                    {
+                        String gapTimeOption = line.getOptionValue("amqp010-rollback-transaction-gap");
+
+                        try {
+                            gapTime = Integer.parseInt(gapTimeOption);
+                            LOG.info("--amqp010-rollback-transaction-gap set to " + sleepTime + " ms");
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            LOG.warn("--amqp010-rollback-transaction-gap option doesn't contain valid integer", e);
+                        }
+                    }
+
+                    tr.add(factAtoB.createAmqp010Rollback(gapTime, waitTime));
+                    tr.add(factBtoA.createAmqp010Rollback(gapTime, waitTime));
                 }
 
                 // AMQP 0-10 XA routers
                 if (line.hasOption("enable-xa-amqp010-routing")) {
                     LOG.info("Creating AMQP 0-10 XA routers");
-                    tr.add(factAtoB.createXARouter());
-                    tr.add(factBtoA.createXARouter());
+
+                    int gapTime = 0;
+                    int waitTime = 0;
+
+                    // Wait time
+                    if (line.hasOption("amqp010-xa-routing-wait-time"))
+                    {
+                        String waitTimeOption = line.getOptionValue("amqp010-xa-routing-wait-time");
+
+                        try {
+                            waitTime = Integer.parseInt(waitTimeOption);
+                            LOG.info("--amqp010-xa-routing-wait-time set to " + sleepTime + " ms");
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            LOG.warn("--amqp010-xa-routing-wait-time option doesn't contain valid integer", e);
+                        }
+                    }
+
+                    // Gap time
+                    if (line.hasOption("amqp010-xa-routing-transaction-gap"))
+                    {
+                        String gapTimeOption = line.getOptionValue("amqp010-xa-routing-transaction-gap");
+
+                        try {
+                            gapTime = Integer.parseInt(gapTimeOption);
+                            LOG.info("--amqp010-xa-routing-transaction-gap set to " + sleepTime + " ms");
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            LOG.warn("--amqp010-xa-routing-transaction-gap option doesn't contain valid integer", e);
+                        }
+                    }
+
+                    tr.add(factAtoB.createXARouter(gapTime, waitTime));
+                    tr.add(factBtoA.createXARouter(gapTime, waitTime));
                 }
 
                 // AMQP 0-10 XA rollbacks
                 if (line.hasOption("enable-xa-amqp010-rollback")) {
-                    // TODO: add waiting times support
                     LOG.info("Creating AMQP 0-10 rollbacks");
-                    tr.add(factAtoB.createXARollback());
-                    tr.add(factBtoA.createXARollback());
+
+                    int gapTime = 0;
+                    int waitTime = 0;
+
+                    // Wait time
+                    if (line.hasOption("amqp010-xa-rollback-wait-time"))
+                    {
+                        String waitTimeOption = line.getOptionValue("amqp010-xa-rollback-wait-time");
+
+                        try {
+                            waitTime = Integer.parseInt(waitTimeOption);
+                            LOG.info("--amqp010-xa-rollback-wait-time set to " + sleepTime + " ms");
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            LOG.warn("--amqp010-xa-rollback-wait-time option doesn't contain valid integer", e);
+                        }
+                    }
+
+                    // Gap time
+                    if (line.hasOption("amqp010-xa-rollback-transaction-gap"))
+                    {
+                        String gapTimeOption = line.getOptionValue("amqp010-xa-rollback-transaction-gap");
+
+                        try {
+                            gapTime = Integer.parseInt(gapTimeOption);
+                            LOG.info("--amqp010-xa-rollback-transaction-gap set to " + sleepTime + " ms");
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            LOG.warn("--amqp010-xa-rollback-transaction-gap option doesn't contain valid integer", e);
+                        }
+                    }
+
+                    tr.add(factAtoB.createXARollback(gapTime, waitTime));
+                    tr.add(factBtoA.createXARollback(gapTime, waitTime));
                 }
             }
-            catch (JMSException e)
-            {
-                LOG.error("Failed to create router", e);
-
-                // Stop the routers
-                stopAllRouters();
-
-                System.exit(1);
-            }
-            catch (NamingException e)
+            catch (JMSException | NamingException e)
             {
                 LOG.error("Failed to create router", e);
 
@@ -248,19 +440,28 @@ public class TransactionMonkey {
         opts.addOption(Option.builder().longOpt("second-broker-queue").hasArg().argName("Queue name").desc("Name of the queue which should be used on the second broker").required().build());
 
         opts.addOption(Option.builder().longOpt("enable-amqp10-routing").desc("Enable routing using AMQP 1.0 protocol").build());
+        opts.addOption(Option.builder().longOpt("amqp10-routing-wait-time").hasArg().argName("Time (ms)").desc("Set wait time before commit (default 0ms)").build());
+        opts.addOption(Option.builder().longOpt("amqp10-routing-transaction-gap").hasArg().argName("Time (ms)").desc("Set time gap before starting new transaction (default 0ms)").build());
 
         opts.addOption(Option.builder().longOpt("enable-amqp10-rollback").desc("Enable rollbacks using AMQP 1.0 protocol").build());
         opts.addOption(Option.builder().longOpt("amqp10-rollback-wait-time").hasArg().argName("Time (ms)").desc("Set wait time before rollback (default 0ms)").build());
+        opts.addOption(Option.builder().longOpt("amqp10-rollback-transaction-gap").hasArg().argName("Time (ms)").desc("Set time gap before starting new transaction (default 0ms)").build());
 
         opts.addOption(Option.builder().longOpt("enable-amqp010-routing").desc("Enable routing using AMQP 0-10 protocol").build());
+        opts.addOption(Option.builder().longOpt("amqp010-routing-wait-time").hasArg().argName("Time (ms)").desc("Set wait time before commit (default 0ms)").build());
+        opts.addOption(Option.builder().longOpt("amqp010-routing-transaction-gap").hasArg().argName("Time (ms)").desc("Set time gap before starting new transaction (default 0ms)").build());
 
         opts.addOption(Option.builder().longOpt("enable-amqp010-rollback").desc("Enable rollbacks using AMQP 0-10 protocol").build());
         opts.addOption(Option.builder().longOpt("amqp010-rollback-wait-time").hasArg().argName("Time (ms)").desc("Set wait time before rollback (default 0ms)").build());
+        opts.addOption(Option.builder().longOpt("amqp010-rollback-transaction-gap").hasArg().argName("Time (ms)").desc("Set time gap before starting new transaction (default 0ms)").build());
 
         opts.addOption(Option.builder().longOpt("enable-xa-amqp010-routing").desc("Enable XA routing using AMQP 0-10 protocol").build());
+        opts.addOption(Option.builder().longOpt("amqp010-xa-routing-wait-time").hasArg().argName("Time (ms)").desc("Set wait time before commit (default 0ms)").build());
+        opts.addOption(Option.builder().longOpt("amqp010-xa-routing-transaction-gap").hasArg().argName("Time (ms)").desc("Set time gap before starting new transaction (default 0ms)").build());
 
         opts.addOption(Option.builder().longOpt("enable-xa-amqp010-rollback").desc("Enable XA rollbacks using AMQP 0-10 protocol").build());
         opts.addOption(Option.builder().longOpt("amqp010-xa-rollback-wait-time").hasArg().argName("Time (ms)").desc("Set wait time before rollback (default 0ms)").build());
+        opts.addOption(Option.builder().longOpt("amqp010-xa-rollback-transaction-gap").hasArg().argName("Time (ms)").desc("Set time gap before starting new transaction (default 0ms)").build());
 
         opts.addOption(Option.builder().longOpt("wait-time").hasArg().argName("time (ms)").desc("How long should the routing proceed (default 1 minute)").build());
 
