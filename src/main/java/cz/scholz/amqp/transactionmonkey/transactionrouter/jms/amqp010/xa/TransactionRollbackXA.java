@@ -110,6 +110,11 @@ public class TransactionRollbackXA extends TransactionRouter {
         finish = true;
     }
 
+    public int getMessageCount()
+    {
+        return messageCounter;
+    }
+
     public void run()
     {
         LOG.info("Starting XA rolling back");

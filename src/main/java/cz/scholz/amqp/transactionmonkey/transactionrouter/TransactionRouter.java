@@ -14,4 +14,5 @@ import java.util.Properties;
 public abstract class TransactionRouter extends Thread {
     public abstract void finish();
     public abstract void run();
+    public abstract int getMessageCount();
 }

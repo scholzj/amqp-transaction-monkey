@@ -21,11 +21,11 @@ public class TransactionMonkey {
     private TransactionRouterFactory factAtoB;
     private TransactionRouterFactory factBtoA;
 
-    private int sleepTime = 60*1000; // Default = 1 minute
+    private int sleepTime = 0;
+    private int transactionCount = 0;
 
     public static void main(String[] args) throws JMSException, NamingException, InterruptedException {
         // TODO: Crete the initial set of messages
-        // TODO: Add option to end after routing X messages as a alternative to waiting time
 
         TransactionMonkey tm = new TransactionMonkey(args);
     }
@@ -64,6 +64,22 @@ public class TransactionMonkey {
                 catch (NumberFormatException e)
                 {
                     LOG.error("--wait-time option doesn't contain valid integer", e);
+                    System.exit(1);
+                }
+            }
+
+            // Configure transaction count
+            if (line.hasOption("transaction-count"))
+            {
+                String transCount = line.getOptionValue("transaction-count");
+
+                try {
+                    transactionCount = Integer.parseInt(transCount);
+                    LOG.info("Transaction count set to " + transactionCount + " ms");
+                }
+                catch (NumberFormatException e)
+                {
+                    LOG.error("--transaction-count option doesn't contain valid integer", e);
                     System.exit(1);
                 }
             }
@@ -360,11 +376,44 @@ public class TransactionMonkey {
         // Start the routers
         startAllRouters();
 
-        try {
-            Thread.sleep(sleepTime);
-        } catch (InterruptedException e) {
-            LOG.error("Sleep was interrupted", e);
+        if (transactionCount > 0)
+        {
+            LOG.info("Waiting for " + transactionCount + " transactions before exit");
+            int totalTransactions = 0;
+
+            while (transactionCount > totalTransactions) {
+                try {
+                    Thread.sleep(1000);
+
+                    totalTransactions = 0;
+
+                    for (TransactionRouter router : tr) {
+                        totalTransactions += router.getMessageCount();
+                    }
+
+                    LOG.trace("Routers processed already " + totalTransactions + " transactions");
+                } catch (InterruptedException e) {
+                    LOG.error("Sleep was interrupted", e);
+                }
+            }
         }
+        else
+        {
+            if (sleepTime == 0)
+            {
+                // Default sleep time is 1 minute
+                sleepTime = 60*1000;
+            }
+
+            try {
+                LOG.info("Waiting for " + sleepTime/1000 + " seconds before exit");
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                LOG.error("Sleep was interrupted", e);
+            }
+        }
+
+
 
         // Stop the routers
         stopAllRouters();
@@ -462,7 +511,10 @@ public class TransactionMonkey {
         opts.addOption(Option.builder().longOpt("amqp010-xa-rollback-wait-time").hasArg().argName("Time (ms)").desc("Set wait time before rollback (default 0ms)").build());
         opts.addOption(Option.builder().longOpt("amqp010-xa-rollback-transaction-gap").hasArg().argName("Time (ms)").desc("Set time gap before starting new transaction (default 0ms)").build());
 
-        opts.addOption(Option.builder().longOpt("wait-time").hasArg().argName("time (ms)").desc("How long should the routing proceed (default 1 minute)").build());
+        OptionGroup timeToRun = new OptionGroup();
+        timeToRun.addOption(Option.builder().longOpt("wait-time").hasArg().argName("time (ms)").desc("How long should the routing proceed (default 1 minute)").build());
+        timeToRun.addOption(Option.builder().longOpt("transaction-count").hasArg().argName("number of messages").desc("Number of transactions to process").build());
+        opts.addOptionGroup(timeToRun);
 
         opts.addOption(Option.builder().longOpt("feed-messages").desc("Feed messages").build());
 

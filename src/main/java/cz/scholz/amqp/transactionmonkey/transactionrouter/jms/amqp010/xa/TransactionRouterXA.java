@@ -110,6 +110,11 @@ public class TransactionRouterXA extends TransactionRouter {
         finish = true;
     }
 
+    public int getMessageCount()
+    {
+        return messageCounter;
+    }
+
     public void run()
     {
         LOG.info("Starting XA routing");

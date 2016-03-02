@@ -81,6 +81,11 @@ abstract public class TransactionRollbackJms extends TransactionRouter {
         finish = true;
     }
 
+    public int getMessageCount()
+    {
+        return messageCounter;
+    }
+
     public void run()
     {
         LOG.info("Starting rolling back");
