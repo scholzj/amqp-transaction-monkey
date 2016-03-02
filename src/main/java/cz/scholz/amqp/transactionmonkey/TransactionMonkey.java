@@ -106,7 +106,7 @@ public class TransactionMonkey {
 
                         try {
                             waitTime = Integer.parseInt(waitTimeOption);
-                            LOG.info("--amqp10-routing-wait-time set to " + sleepTime + " ms");
+                            LOG.info("--amqp10-routing-wait-time set to " + waitTime + " ms");
                         }
                         catch (NumberFormatException e)
                         {
@@ -121,7 +121,7 @@ public class TransactionMonkey {
 
                         try {
                             gapTime = Integer.parseInt(gapTimeOption);
-                            LOG.info("--amqp10-routing-transaction-gap set to " + sleepTime + " ms");
+                            LOG.info("--amqp10-routing-transaction-gap set to " + gapTime + " ms");
                         }
                         catch (NumberFormatException e)
                         {
@@ -147,7 +147,7 @@ public class TransactionMonkey {
 
                         try {
                             waitTime = Integer.parseInt(waitTimeOption);
-                            LOG.info("--amqp010-routing-wait-time set to " + sleepTime + " ms");
+                            LOG.info("--amqp010-routing-wait-time set to " + waitTime + " ms");
                         }
                         catch (NumberFormatException e)
                         {
@@ -162,7 +162,7 @@ public class TransactionMonkey {
 
                         try {
                             gapTime = Integer.parseInt(gapTimeOption);
-                            LOG.info("--amqp010-routing-transaction-gap set to " + sleepTime + " ms");
+                            LOG.info("--amqp010-routing-transaction-gap set to " + gapTime + " ms");
                         }
                         catch (NumberFormatException e)
                         {
@@ -188,7 +188,7 @@ public class TransactionMonkey {
 
                         try {
                             waitTime = Integer.parseInt(waitTimeOption);
-                            LOG.info("--amqp10-rollback-wait-time set to " + sleepTime + " ms");
+                            LOG.info("--amqp10-rollback-wait-time set to " + waitTime + " ms");
                         }
                         catch (NumberFormatException e)
                         {
@@ -203,7 +203,7 @@ public class TransactionMonkey {
 
                         try {
                             gapTime = Integer.parseInt(gapTimeOption);
-                            LOG.info("--amqp10-rollback-transaction-gap set to " + sleepTime + " ms");
+                            LOG.info("--amqp10-rollback-transaction-gap set to " + gapTime + " ms");
                         }
                         catch (NumberFormatException e)
                         {
@@ -229,7 +229,7 @@ public class TransactionMonkey {
 
                         try {
                             waitTime = Integer.parseInt(waitTimeOption);
-                            LOG.info("--amqp010-rollback-wait-time set to " + sleepTime + " ms");
+                            LOG.info("--amqp010-rollback-wait-time set to " + waitTime + " ms");
                         }
                         catch (NumberFormatException e)
                         {
@@ -244,7 +244,7 @@ public class TransactionMonkey {
 
                         try {
                             gapTime = Integer.parseInt(gapTimeOption);
-                            LOG.info("--amqp010-rollback-transaction-gap set to " + sleepTime + " ms");
+                            LOG.info("--amqp010-rollback-transaction-gap set to " + gapTime + " ms");
                         }
                         catch (NumberFormatException e)
                         {
@@ -270,7 +270,7 @@ public class TransactionMonkey {
 
                         try {
                             waitTime = Integer.parseInt(waitTimeOption);
-                            LOG.info("--amqp010-xa-routing-wait-time set to " + sleepTime + " ms");
+                            LOG.info("--amqp010-xa-routing-wait-time set to " + waitTime + " ms");
                         }
                         catch (NumberFormatException e)
                         {
@@ -285,7 +285,7 @@ public class TransactionMonkey {
 
                         try {
                             gapTime = Integer.parseInt(gapTimeOption);
-                            LOG.info("--amqp010-xa-routing-transaction-gap set to " + sleepTime + " ms");
+                            LOG.info("--amqp010-xa-routing-transaction-gap set to " + gapTime + " ms");
                         }
                         catch (NumberFormatException e)
                         {
@@ -311,7 +311,7 @@ public class TransactionMonkey {
 
                         try {
                             waitTime = Integer.parseInt(waitTimeOption);
-                            LOG.info("--amqp010-xa-rollback-wait-time set to " + sleepTime + " ms");
+                            LOG.info("--amqp010-xa-rollback-wait-time set to " + waitTime + " ms");
                         }
                         catch (NumberFormatException e)
                         {
@@ -326,7 +326,7 @@ public class TransactionMonkey {
 
                         try {
                             gapTime = Integer.parseInt(gapTimeOption);
-                            LOG.info("--amqp010-xa-rollback-transaction-gap set to " + sleepTime + " ms");
+                            LOG.info("--amqp010-xa-rollback-transaction-gap set to " + gapTime + " ms");
                         }
                         catch (NumberFormatException e)
                         {
