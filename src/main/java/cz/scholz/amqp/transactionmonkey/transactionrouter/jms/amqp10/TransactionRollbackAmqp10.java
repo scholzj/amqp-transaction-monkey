@@ -24,9 +24,9 @@ public class TransactionRollbackAmqp10 extends TransactionRollbackJms {
 
     protected void prepareProperties(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException
     {
-        String sourceBroker = String.format("amqp://%s:%s?jms.username=%s&jms.password=%s&jms.prefetchPolicy.all=10", sourceHost, sourcePort, sourceUsername, sourcePassword);
+        String sourceBroker = String.format("amqp://%s:%s?jms.username=%s&jms.password=%s&jms.prefetchPolicy.all=100", sourceHost, sourcePort, sourceUsername, sourcePassword);
         LOG.info("Source broker URL prepared as " + sourceBroker);
-        String targetBroker = String.format("amqp://%s:%s?jms.username=%s&jms.password=%s&jms.prefetchPolicy.all=10", targetHost, targetPort, targetUsername, targetPassword);
+        String targetBroker = String.format("amqp://%s:%s?jms.username=%s&jms.password=%s", targetHost, targetPort, targetUsername, targetPassword);
         LOG.info("Target broker URL prepared as " + targetBroker);
 
         props = new Properties();

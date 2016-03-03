@@ -48,7 +48,7 @@ public class TransactionRouterXA extends TransactionRouter {
 
     protected void prepareProperties(String sourceHost, String sourcePort, String sourceUsername, String sourcePassword, String sourceQueue, String targetHost, String targetPort, String targetUsername, String targetPassword, String targetQueue) throws NamingException
     {
-        String sourceBroker = String.format("amqp://%s:%s@TransactionMonkey/?brokerlist='tcp://%s:%s'", sourceUsername, sourcePassword, sourceHost, sourcePort);
+        String sourceBroker = String.format("amqp://%s:%s@TransactionMonkey/?brokerlist='tcp://%s:%s?max_prefetch='100''", sourceUsername, sourcePassword, sourceHost, sourcePort);
         LOG.info("Source broker URL prepared as " + sourceBroker);
         String targetBroker = String.format("amqp://%s:%s@TransactionMonkey/?brokerlist='tcp://%s:%s'", targetUsername, targetPassword, targetHost, targetPort);
         LOG.info("Target broker URL prepared as " + targetBroker);
