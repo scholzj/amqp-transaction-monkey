@@ -1,5 +1,7 @@
 package cz.scholz.amqp.transactionmonkey;
 
+import cz.scholz.amqp.transactionmonkey.feeder.MessageFeeder;
+import cz.scholz.amqp.transactionmonkey.feeder.MessageFeederException;
 import cz.scholz.amqp.transactionmonkey.transactionrouter.TransactionRouter;
 import cz.scholz.amqp.transactionmonkey.transactionrouter.TransactionRouterFactory;
 import org.apache.commons.cli.*;
@@ -23,6 +25,22 @@ public class TransactionMonkey {
 
     private int sleepTime = 0;
     private int transactionCount = 0;
+
+    private String aHost;
+    private String aPort;
+    private String aUsername;
+    private String aPassword;
+    private String aQueue;
+    private String bHost;
+    private String bPort;
+    private String bUsername;
+    private String bPassword;
+    private String bQueue;
+
+    private boolean feedMessages = false;
+    private int messageCount = 1000;
+    private int messageSize = 1024;
+
 
     public static void main(String[] args) throws JMSException, NamingException, InterruptedException {
         // TODO: Crete the initial set of messages
@@ -85,21 +103,51 @@ public class TransactionMonkey {
             }
 
             // Collect broker details
-            String aHost = line.getOptionValue("first-broker-host");
-            String aPort = line.getOptionValue("first-broker-port");
-            String aUsername = line.getOptionValue("first-broker-username", null);
-            String aPassword = line.getOptionValue("first-broker-password", null);
-            String aQueue = line.getOptionValue("first-broker-queue");
-            String bHost = line.getOptionValue("second-broker-host");
-            String bPort = line.getOptionValue("second-broker-port");
-            String bUsername = line.getOptionValue("second-broker-username", null);
-            String bPassword = line.getOptionValue("second-broker-password", null);
-            String bQueue = line.getOptionValue("second-broker-queue");
+            aHost = line.getOptionValue("first-broker-host");
+            aPort = line.getOptionValue("first-broker-port");
+            aUsername = line.getOptionValue("first-broker-username", null);
+            aPassword = line.getOptionValue("first-broker-password", null);
+            aQueue = line.getOptionValue("first-broker-queue");
+            bHost = line.getOptionValue("second-broker-host");
+            bPort = line.getOptionValue("second-broker-port");
+            bUsername = line.getOptionValue("second-broker-username", null);
+            bPassword = line.getOptionValue("second-broker-password", null);
+            bQueue = line.getOptionValue("second-broker-queue");
 
             // Feed messages
             if (line.hasOption("feed-messages"))
             {
-                feedMessages();
+                feedMessages = true;
+
+                if (line.hasOption("feed-messages-count"))
+                {
+                    String msgCount = line.getOptionValue("feed-messages-count");
+
+                    try {
+                        messageCount = Integer.parseInt(msgCount);
+                        LOG.info("Message count set to " + messageCount + " msg");
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        LOG.error("--feed-messages-count option doesn't contain valid integer", e);
+                        System.exit(1);
+                    }
+                }
+
+                if (line.hasOption("feed-messages-size"))
+                {
+                    String msgSize = line.getOptionValue("feed-messages-size");
+
+                    try {
+                        messageSize = Integer.parseInt(msgSize);
+                        LOG.info("Message size set to " + messageCount + " bytes");
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        LOG.error("--feed-messages-size option doesn't contain valid integer", e);
+                        System.exit(1);
+                    }
+                }
             }
 
             // Configure factories
@@ -363,8 +411,6 @@ public class TransactionMonkey {
 
                 System.exit(1);
             }
-
-
         }
         catch (ParseException e)
         {
@@ -373,47 +419,24 @@ public class TransactionMonkey {
             System.exit(1);
         }
 
+        // Feeding messages
+        if (feedMessages)
+        {
+            try {
+                feedMessages(messageCount, messageSize);
+            }
+            catch (MessageFeederException e)
+            {
+                LOG.error("Failed to feed the messages", e);
+                System.exit(1);
+            }
+        }
+
         // Start the routers
         startAllRouters();
 
-        if (transactionCount > 0)
-        {
-            LOG.info("Waiting for " + transactionCount + " transactions before exit");
-            int totalTransactions = 0;
-
-            while (transactionCount > totalTransactions) {
-                try {
-                    Thread.sleep(1000);
-
-                    totalTransactions = 0;
-
-                    for (TransactionRouter router : tr) {
-                        totalTransactions += router.getMessageCount();
-                    }
-
-                    LOG.trace("Routers processed already " + totalTransactions + " transactions");
-                } catch (InterruptedException e) {
-                    LOG.error("Sleep was interrupted", e);
-                }
-            }
-        }
-        else
-        {
-            if (sleepTime == 0)
-            {
-                // Default sleep time is 1 minute
-                sleepTime = 60*1000;
-            }
-
-            try {
-                LOG.info("Waiting for " + sleepTime/1000 + " seconds before exit");
-                Thread.sleep(sleepTime);
-            } catch (InterruptedException e) {
-                LOG.error("Sleep was interrupted", e);
-            }
-        }
-
-
+        // Run the routers
+        runRouters();
 
         // Stop the routers
         stopAllRouters();
@@ -450,6 +473,46 @@ public class TransactionMonkey {
         LOG.info("All routers are stopped");
     }
 
+    private void runRouters()
+    {
+        if (transactionCount > 0)
+        {
+            LOG.info("Waiting for " + transactionCount + " transactions before exit");
+            int totalTransactions = 0;
+
+            while (transactionCount > totalTransactions) {
+                try {
+                    Thread.sleep(1000);
+
+                    totalTransactions = 0;
+
+                    for (TransactionRouter router : tr) {
+                        totalTransactions += router.getMessageCount();
+                    }
+
+                    LOG.trace("Routers processed already " + totalTransactions + " transactions");
+                } catch (InterruptedException e) {
+                    LOG.error("Sleep was interrupted", e);
+                }
+            }
+        }
+        else
+        {
+            if (sleepTime == 0)
+            {
+                // Default sleep time is 1 minute
+                sleepTime = 60*1000;
+            }
+
+            try {
+                LOG.info("Waiting for " + sleepTime/1000 + " seconds before exit");
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                LOG.error("Sleep was interrupted", e);
+            }
+        }
+    }
+
     private void configureLogging(String logLevel)
     {
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", logLevel);
@@ -458,9 +521,15 @@ public class TransactionMonkey {
         LOG = LoggerFactory.getLogger(TransactionMonkey.class);
     }
 
-    private void feedMessages()
+    private void feedMessages(int messageCount, int messageSize) throws MessageFeederException
     {
-        // TODO: Implement feedMessages()
+        LOG.info("Feeding messages into first broker");
+        MessageFeeder aFeeder = new MessageFeeder(aHost, aPort, aUsername, aPassword, aQueue);
+        aFeeder.feed(messageCount, messageSize);
+
+        LOG.info("Feeding messages into second broker");
+        MessageFeeder bFeeder = new MessageFeeder(bHost, bPort, bUsername, bPassword, bQueue);
+        bFeeder.feed(messageCount, messageSize);
     }
 
     private void printHelp()
@@ -517,6 +586,8 @@ public class TransactionMonkey {
         opts.addOptionGroup(timeToRun);
 
         opts.addOption(Option.builder().longOpt("feed-messages").desc("Feed messages").build());
+        opts.addOption(Option.builder().longOpt("feed-messages-count").hasArg().argName("number of messages").desc("Number of messages to feed into each broker (Default: 1000 msg)").build());
+        opts.addOption(Option.builder().longOpt("feed-messages-size").hasArg().argName("message size (bytes)").desc("Message size (Default: 1024 bytes)").build());
 
         opts.addOption(Option.builder().longOpt("log-level").hasArg().argName("Log level").desc("Enable routing using AMQP 1.0 protocol (default INFO)").build());
 
