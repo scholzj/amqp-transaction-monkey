@@ -43,8 +43,6 @@ public class TransactionMonkey {
 
 
     public static void main(String[] args) throws JMSException, NamingException, InterruptedException {
-        // TODO: Crete the initial set of messages
-
         TransactionMonkey tm = new TransactionMonkey(args);
     }
 
