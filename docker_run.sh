@@ -116,7 +116,7 @@ EOF
 
 # get source code into the docker container
 function prepare_sources_on_container() {
-    ${SUDO} docker exec ${JAVA_CONTAINER_NAME} bash -c "cd && git clone https://github.com/scholzj/amqp-transaction-monkey.git amqp-transaction-monkey"
+    ${SUDO} docker exec ${JAVA_CONTAINER_NAME} bash -c "cd && git config --global http.proxy http://webproxy.deutsche-boerse.de:8080 && git clone https://github.com/scholzj/amqp-transaction-monkey.git amqp-transaction-monkey"
 }
 
 # param: $1 - maven pom xml name
@@ -124,8 +124,7 @@ function execute_tests() {
     local AMQP_CONTAINER_NAME_IP_ADDRESS1=$(${SUDO} docker inspect --format "{{ .NetworkSettings.Networks.${DOCKER_NETWORK}.IPAddress }}" ${AMQP_CONTAINER_NAME1})
     local AMQP_CONTAINER_NAME_IP_ADDRESS2=$(${SUDO} docker inspect --format "{{ .NetworkSettings.Networks.${DOCKER_NETWORK}.IPAddress }}" ${AMQP_CONTAINER_NAME2})
 
-    ${SUDO} docker exec ${JAVA_CONTAINER_NAME} bash -c "cd && cd amqp-transaction-monkey && mvn package && java -jar target/transaction-monkey-0.1-SNAPSHOT.jar --first-broker-host ${AMQP_CONTAINER_NAME_IP_ADDRESS1} --first-broker-port 5672 --first-broker-username admin --first-broker-password admin --first-broker-queue broadcast.user1.rtgQueue --second-broker-host ${AMQP_CONTAINER_NAME_IP_ADDRESS2} --second-broker-port 5672 --second-broker-username admin --second-broker-password admin --second-broker-queue broadcast.user1.rtgQueue --enable-amqp10-routing --enable-amqp010-routing --enable-xa-amqp010-routing --enable-amqp10-rollback --enable-amqp010-rollback --enable-xa-amqp010-rollback --transaction-count=10000"
-    # java -jar target/transaction-monkey-0.1-SNAPSHOT.jar --first-broker-host 192.168.99.100 --first-broker-port 32770 --first-broker-username admin --first-broker-password admin --first-broker-queue broadcast.user1.rtgQueue --second-broker-host 192.168.99.100 --second-broker-port 32768 --second-broker-username admin --second-broker-password admin --second-broker-queue broadcast.user1.rtgQueue --enable-amqp10-routing --enable-amqp010-routing --enable-xa-amqp010-routing --enable-amqp10-rollback --enable-amqp010-rollback --enable-xa-amqp010-rollback --transaction-count=10000
+    ${SUDO} docker exec ${JAVA_CONTAINER_NAME} bash -c "cd && cd amqp-transaction-monkey && mvn package && java -jar target/transaction-monkey-0.1-SNAPSHOT.jar --first-broker-host ${AMQP_CONTAINER_NAME_IP_ADDRESS1} --first-broker-port 5672 --first-broker-username admin --first-broker-password admin --first-broker-queue broadcast.user1.rtgQueue --second-broker-host ${AMQP_CONTAINER_NAME_IP_ADDRESS2} --second-broker-port 5672 --second-broker-username admin --second-broker-password admin --second-broker-queue broadcast.user1.rtgQueue --enable-amqp10-routing --enable-amqp010-routing --enable-xa-amqp010-routing --enable-amqp10-rollback --enable-amqp010-rollback --enable-xa-amqp010-rollback --transaction-count=1000000 --feed-messages"
     local RETURN_CODE=$?
     RESULTS_MSG+="POM.XML: $1,"
     if [ ${RETURN_CODE} -eq 0 ] ; then
