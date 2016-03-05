@@ -44,7 +44,7 @@ public class MessageFeeder {
             Context ctx = new InitialContext(props);
             ConnectionFactory fact = (ConnectionFactory) ctx.lookup("broker");
             connection = fact.createConnection();
-            session = connection.createSession(true, Session.AUTO_ACKNOWLEDGE);
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             sender = session.createProducer((Queue) ctx.lookup("queue"));
             sender.setDeliveryMode(DeliveryMode.PERSISTENT);
             connection.start();
