@@ -56,13 +56,6 @@ public class Configuration {
             CommandLineParser parser = new DefaultParser();
             CommandLine line = parser.parse(getConfigurationOptions(), args);
 
-            // Print help
-            // TODO: Print help without an error
-            if (line.hasOption("help")) {
-                printHelp();
-                throw new ConfigurationException("Help information was requested");
-            }
-
             // Configure log level
             if (line.hasOption("log-level"))
             {
@@ -348,7 +341,7 @@ public class Configuration {
         }
     }
 
-    public Options getConfigurationOptions()
+    public static Options getConfigurationOptions()
     {
         Options opts = new Options();
 
@@ -404,7 +397,7 @@ public class Configuration {
         return opts;
     }
 
-    public void printHelp()
+    public static void printHelp()
     {
         HelpFormatter formatter = new HelpFormatter();
         formatter.setOptionComparator(null);

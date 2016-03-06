@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -26,7 +27,12 @@ public class TransactionMonkey {
     private Configuration config;
 
     public static void main(String[] args) {
-        // TODO: Help
+        // Handle help
+        if (Arrays.asList(args).contains("--help"))
+        {
+            Configuration.printHelp();
+            System.exit(0);
+        }
 
         Configuration config = null;
 
