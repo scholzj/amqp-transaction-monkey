@@ -25,7 +25,7 @@ public class TransactionMonkey {
 
     private Configuration config;
 
-    public static void main(String[] args) throws JMSException, NamingException, InterruptedException {
+    public static void main(String[] args) {
         // TODO: Help
 
         Configuration config = null;
