@@ -45,40 +45,50 @@ public class TransactionMonkey {
             System.exit(1);
         }
 
-        TransactionMonkey tm = new TransactionMonkey(config);
+        try {
+            TransactionMonkey tm = new TransactionMonkey(config);
+        }
+        catch (TransactionMonkeyException e)
+        {
+            System.exit(1);
+        }
     }
 
-    public TransactionMonkey(Configuration newConfig)
-    {
+    public TransactionMonkey(Configuration newConfig) throws TransactionMonkeyException {
         config = newConfig;
         configureLogging(config.getLogLevel());
-        createRouters();
 
-        // Feeding messages
-        if (config.isFeedMessages())
-        {
-            try {
-                feedMessages();
+        try {
+            createRouters();
+
+            // Feeding messages
+            if (config.isFeedMessages()) {
+                try {
+                    feedMessages();
+                } catch (MessageFeederException e) {
+                    LOG.error("Failed to feed the messages", e);
+                    System.exit(1);
+                }
             }
-            catch (MessageFeederException e)
-            {
-                LOG.error("Failed to feed the messages", e);
-                System.exit(1);
-            }
+
+            // Start the routers
+            startAllRouters();
+
+            // Run the routers
+            runRouters();
         }
-
-        // Start the routers
-        startAllRouters();
-
-        // Run the routers
-        runRouters();
-
-        // Stop the routers
-        stopAllRouters();
+        catch (TransactionMonkeyException e)
+        {
+            throw new TransactionMonkeyException(e);
+        }
+        finally {
+            // Stop the routers
+            stopAllRouters();
+        }
     }
 
 
-    private void createRouters() {
+    private void createRouters() throws TransactionMonkeyException {
         // Configure factories
         TransactionRouterFactory factAtoB = new TransactionRouterFactory(config.getaHost(), config.getaPort(), config.getaUsername(), config.getaPassword(), config.getaQueue(), config.getbHost(), config.getbPort(), config.getbUsername(), config.getbPassword(), config.getbQueue());
         TransactionRouterFactory factBtoA = new TransactionRouterFactory(config.getbHost(), config.getbPort(), config.getbUsername(), config.getbPassword(), config.getbQueue(), config.getaHost(), config.getaPort(), config.getaUsername(), config.getaPassword(), config.getaQueue());
@@ -130,12 +140,7 @@ public class TransactionMonkey {
         catch (JMSException | NamingException e)
         {
             LOG.error("Failed to create router", e);
-
-            // Stop the routers
-            stopAllRouters();
-
-            // TODO: Do not exit - throw exception
-            System.exit(1);
+            throw new TransactionMonkeyException("Failed to create router", e);
         }
     }
 
@@ -170,8 +175,7 @@ public class TransactionMonkey {
         LOG.info("All routers are stopped");
     }
 
-    private void runRouters()
-    {
+    private void runRouters() throws TransactionMonkeyException {
         if (config.getTransactionCount() > 0)
         {
             LOG.info("Waiting for " + config.getTransactionCount() + " transactions before exit");
@@ -190,6 +194,7 @@ public class TransactionMonkey {
                     LOG.trace("Routers processed already " + totalTransactions + " transactions");
                 } catch (InterruptedException e) {
                     LOG.error("Sleep was interrupted", e);
+                    throw new TransactionMonkeyException("Sleep was interrupted", e);
                 }
             }
         }
@@ -200,6 +205,7 @@ public class TransactionMonkey {
                 Thread.sleep(config.getWaitTime());
             } catch (InterruptedException e) {
                 LOG.error("Sleep was interrupted", e);
+                throw new TransactionMonkeyException("Sleep was interrupted", e);
             }
         }
     }
