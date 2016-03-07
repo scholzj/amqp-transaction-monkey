@@ -30,6 +30,7 @@ public class Main {
 
         try {
             TransactionMonkey tm = new TransactionMonkey(config);
+            tm.run();
         }
         catch (TransactionMonkeyException e)
         {

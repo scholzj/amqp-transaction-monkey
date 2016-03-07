@@ -26,22 +26,19 @@ public class TransactionMonkey {
 
     private Configuration config;
 
-    public TransactionMonkey(Configuration newConfig) throws TransactionMonkeyException {
+    public TransactionMonkey(Configuration newConfig) {
         config = newConfig;
         configureLogging(config.getLogLevel());
+    }
 
+    public void run() throws TransactionMonkeyException
+    {
         try {
+            // create routers
             createRouters();
 
             // Feeding messages
-            if (config.isFeedMessages()) {
-                try {
-                    feedMessages();
-                } catch (MessageFeederException e) {
-                    LOG.error("Failed to feed the messages", e);
-                    System.exit(1);
-                }
-            }
+            feedMessages();
 
             // Start the routers
             startAllRouters();
@@ -190,14 +187,20 @@ public class TransactionMonkey {
         LOG = LoggerFactory.getLogger(TransactionMonkey.class);
     }
 
-    private void feedMessages() throws MessageFeederException
-    {
-        LOG.info("Feeding messages into first broker");
-        MessageFeeder aFeeder = new MessageFeeder(config.getaHost(), config.getaPort(), config.getaUsername(), config.getaPassword(), config.getaQueue());
-        aFeeder.feed(config.getFeedMessagesCount(), config.getFeedMessagesSize());
+    private void feedMessages() throws TransactionMonkeyException {
+        if (config.isFeedMessages()) {
+            try {
+                LOG.info("Feeding messages into first broker");
+                MessageFeeder aFeeder = new MessageFeeder(config.getaHost(), config.getaPort(), config.getaUsername(), config.getaPassword(), config.getaQueue());
+                aFeeder.feed(config.getFeedMessagesCount(), config.getFeedMessagesSize());
 
-        LOG.info("Feeding messages into second broker");
-        MessageFeeder bFeeder = new MessageFeeder(config.getbHost(), config.getbPort(), config.getbUsername(), config.getbPassword(), config.getbQueue());
-        bFeeder.feed(config.getFeedMessagesCount(), config.getFeedMessagesSize());
+                LOG.info("Feeding messages into second broker");
+                MessageFeeder bFeeder = new MessageFeeder(config.getbHost(), config.getbPort(), config.getbUsername(), config.getbPassword(), config.getbQueue());
+                bFeeder.feed(config.getFeedMessagesCount(), config.getFeedMessagesSize());
+            } catch (MessageFeederException e) {
+                LOG.error("Failed to feed the messages", e);
+                throw new TransactionMonkeyException("Failed to feed the messages", e);
+            }
+        }
     }
 }
