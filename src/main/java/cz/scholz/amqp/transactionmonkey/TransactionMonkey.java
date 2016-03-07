@@ -20,39 +20,11 @@ import java.util.List;
  * Created by schojak on 31.12.15.
  */
 public class TransactionMonkey {
-    static Logger LOG;
+    private static Logger LOG;
 
     private List<TransactionRouter> tr = new ArrayList<>();
 
     private Configuration config;
-
-    public static void main(String[] args) {
-        // Handle help
-        if (Arrays.asList(args).contains("--help"))
-        {
-            Configuration.printHelp();
-            System.exit(0);
-        }
-
-        Configuration config = null;
-
-        try
-        {
-            config = new Configuration(args);
-        }
-        catch (ConfigurationException e)
-        {
-            System.exit(1);
-        }
-
-        try {
-            TransactionMonkey tm = new TransactionMonkey(config);
-        }
-        catch (TransactionMonkeyException e)
-        {
-            System.exit(1);
-        }
-    }
 
     public TransactionMonkey(Configuration newConfig) throws TransactionMonkeyException {
         config = newConfig;

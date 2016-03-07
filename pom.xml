@@ -26,7 +26,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>./lib</classpathPrefix>
-                            <mainClass>cz.scholz.amqp.transactionmonkey.TransactionMonkey</mainClass>
+                            <mainClass>cz.scholz.amqp.transactionmonkey.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
