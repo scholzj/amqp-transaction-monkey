@@ -1,19 +1,16 @@
 package cz.scholz.amqp.transactionmonkey;
 
 import cz.scholz.amqp.transactionmonkey.configuration.Configuration;
-import cz.scholz.amqp.transactionmonkey.configuration.ConfigurationException;
 import cz.scholz.amqp.transactionmonkey.feeder.MessageFeeder;
 import cz.scholz.amqp.transactionmonkey.feeder.MessageFeederException;
 import cz.scholz.amqp.transactionmonkey.transactionrouter.TransactionRouter;
 import cz.scholz.amqp.transactionmonkey.transactionrouter.TransactionRouterFactory;
-import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
