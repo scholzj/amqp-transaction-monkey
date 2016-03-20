@@ -63,21 +63,13 @@ public class Configuration {
             // Configure log level
             if (line.hasOption("log-level"))
             {
-                logLevel = line.getOptionValue("log-level");
+                setLogLevel(line.getOptionValue("log-level"));
             }
 
             // Configure sleep time
             if (line.hasOption("wait-time"))
             {
-                String option = line.getOptionValue("wait-time");
-
-                try {
-                    waitTime = Integer.parseInt(option);
-                }
-                catch (NumberFormatException e)
-                {
-                    throw new ConfigurationException("--wait-time option doesn't contain valid integer", e);
-                }
+                setWaitTime(line.getOptionValue("wait-time"));
             }
 
             // Configure transaction count
@@ -95,20 +87,16 @@ public class Configuration {
             }
 
             // Collect broker details
-            aHost = line.getOptionValue("first-broker-host");
-
+            setaHost(line.getOptionValue("first-broker-host"));
             setaPort(line.getOptionValue("first-broker-port"));
-
-            aUsername = line.getOptionValue("first-broker-username", null);
-            aPassword = line.getOptionValue("first-broker-password", null);
-            aQueue = line.getOptionValue("first-broker-queue");
-            bHost = line.getOptionValue("second-broker-host");
-
+            setaUsername(line.getOptionValue("first-broker-username", null));
+            setaPassword(line.getOptionValue("first-broker-password", null));
+            setaQueue(line.getOptionValue("first-broker-queue"));
+            setbHost(line.getOptionValue("second-broker-host"));
             setbPort(line.getOptionValue("second-broker-port"));
-
-            bUsername = line.getOptionValue("second-broker-username", null);
-            bPassword = line.getOptionValue("second-broker-password", null);
-            bQueue = line.getOptionValue("second-broker-queue");
+            setbUsername(line.getOptionValue("second-broker-username", null));
+            setbPassword(line.getOptionValue("second-broker-password", null));
+            setbQueue(line.getOptionValue("second-broker-queue"));
 
             // Feed messages
             if (line.hasOption("feed-messages"))
@@ -560,7 +548,17 @@ public class Configuration {
         return waitTime;
     }
 
-    public void setWaitTime(int waitTime) {
+    public void setWaitTime(String waitTime) throws ConfigurationException {
+        try {
+            this.waitTime = Integer.parseInt(waitTime);
+        }
+        catch (NumberFormatException e)
+        {
+            throw new ConfigurationException("--wait-time option doesn't contain valid integer", e);
+        }
+    }
+
+    public void setWaitTime(int waitTime) throws ConfigurationException {
         this.waitTime = waitTime;
     }
 
