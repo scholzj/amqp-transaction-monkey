@@ -51,6 +51,10 @@ public class Configuration {
     private int xaRollbackWaitTime = 0;
     private int xaRollbackTransactionGap = 0;
 
+    public Configuration() {
+        // Create empty configuration
+    }
+
     public Configuration(String[] args) throws ConfigurationException {
         try {
             CommandLineParser parser = new DefaultParser();
@@ -92,42 +96,19 @@ public class Configuration {
 
             // Collect broker details
             aHost = line.getOptionValue("first-broker-host");
-            aPort = line.getOptionValue("first-broker-port");
+
+            setaPort(line.getOptionValue("first-broker-port"));
+
             aUsername = line.getOptionValue("first-broker-username", null);
             aPassword = line.getOptionValue("first-broker-password", null);
             aQueue = line.getOptionValue("first-broker-queue");
             bHost = line.getOptionValue("second-broker-host");
-            bPort = line.getOptionValue("second-broker-port");
+
+            setbPort(line.getOptionValue("second-broker-port"));
+
             bUsername = line.getOptionValue("second-broker-username", null);
             bPassword = line.getOptionValue("second-broker-password", null);
             bQueue = line.getOptionValue("second-broker-queue");
-
-            // Check port numbers
-            try {
-                int port = Integer.parseInt(aPort);
-
-                if (port < 1 || port > 65535)
-                {
-                    throw new ConfigurationException("--first-broker-port option doesn't contain valid port number between 1 and 65535");
-                }
-            }
-            catch (NumberFormatException e)
-            {
-                throw new ConfigurationException("--first-broker-port option doesn't contain valid integer", e);
-            }
-
-            try {
-                int port = Integer.parseInt(bPort);
-
-                if (port < 1 || port > 65535)
-                {
-                    throw new ConfigurationException("--second-broker-port option doesn't contain valid port number between 1 and 65535");
-                }
-            }
-            catch (NumberFormatException e)
-            {
-                throw new ConfigurationException("--second-broker-port option doesn't contain valid integer", e);
-            }
 
             // Feed messages
             if (line.hasOption("feed-messages"))
@@ -444,8 +425,31 @@ public class Configuration {
         return aPort;
     }
 
-    public void setaPort(String aPort) {
+    public void setaPort(String aPort) throws ConfigurationException {
+        try {
+            validatePort(aPort);
+        }
+        catch (ConfigurationException e)
+        {
+            throw new ConfigurationException("--first-broker-port is not valid", e);
+        }
+
         this.aPort = aPort;
+    }
+
+    private void validatePort(String port) throws ConfigurationException {
+        try {
+            int iPort = Integer.parseInt(port);
+
+            if (iPort < 1 || iPort > 65535)
+            {
+                throw new ConfigurationException("Port doesn't contain valid port number between 1 and 65535 - port contains " + port);
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            throw new ConfigurationException("Port option doesn't contain valid integer", e);
+        }
     }
 
     public String getaUsername() {
@@ -484,7 +488,15 @@ public class Configuration {
         return bPort;
     }
 
-    public void setbPort(String bPort) {
+    public void setbPort(String bPort) throws ConfigurationException {
+        try {
+            validatePort(bPort);
+        }
+        catch (ConfigurationException e)
+        {
+            throw new ConfigurationException("--second-broker-port is not valid", e);
+        }
+
         this.bPort = bPort;
     }
 
