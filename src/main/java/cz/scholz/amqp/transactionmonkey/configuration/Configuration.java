@@ -102,6 +102,23 @@ public class Configuration {
             bPassword = line.getOptionValue("second-broker-password", null);
             bQueue = line.getOptionValue("second-broker-queue");
 
+            // Check port numbers
+            try {
+                Integer.parseInt(aPort);
+            }
+            catch (NumberFormatException e)
+            {
+                throw new ConfigurationException("--first-broker-port option doesn't contain valid integer", e);
+            }
+
+            try {
+                Integer.parseInt(bPort);
+            }
+            catch (NumberFormatException e)
+            {
+                throw new ConfigurationException("--second-broker-port option doesn't contain valid integer", e);
+            }
+
             // Feed messages
             if (line.hasOption("feed-messages"))
             {
