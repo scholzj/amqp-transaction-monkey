@@ -104,7 +104,12 @@ public class Configuration {
 
             // Check port numbers
             try {
-                Integer.parseInt(aPort);
+                int port = Integer.parseInt(aPort);
+
+                if (port < 1 && port > 65535)
+                {
+                    throw new ConfigurationException("--first-broker-port option doesn't contain valid port number between 1 and 65535");
+                }
             }
             catch (NumberFormatException e)
             {
@@ -112,7 +117,12 @@ public class Configuration {
             }
 
             try {
-                Integer.parseInt(bPort);
+                int port = Integer.parseInt(bPort);
+
+                if (port < 1 && port > 65535)
+                {
+                    throw new ConfigurationException("--second-broker-port option doesn't contain valid port number between 1 and 65535");
+                }
             }
             catch (NumberFormatException e)
             {
