@@ -97,4 +97,108 @@ public class ConfigurationTest {
             //pass
         }
     }
+
+    @Test
+    public void testLogLevel() throws ConfigurationException
+    {
+        Configuration config = new Configuration();
+        String DEFAULT_LOG_LEVEL = config.getLogLevel();
+
+        config.setLogLevel(null);
+        Assert.assertEquals(DEFAULT_LOG_LEVEL, config.getLogLevel(), "Incorrect Log Level set for null");
+
+        config.setLogLevel("error");
+        Assert.assertEquals("error", config.getLogLevel(), "Incorrect Log Level set for error");
+
+        config.setLogLevel("warning");
+        Assert.assertEquals("warning", config.getLogLevel(), "Incorrect Log Level set for warning");
+
+        config.setLogLevel("info");
+        Assert.assertEquals("info", config.getLogLevel(), "Incorrect Log Level set for info");
+
+        config.setLogLevel("debug");
+        Assert.assertEquals("debug", config.getLogLevel(), "Incorrect Log Level set for debug");
+
+        config.setLogLevel("trace");
+        Assert.assertEquals("trace", config.getLogLevel(), "Incorrect Log Level set for trace");
+
+        config.setLogLevel("TRACE");
+        Assert.assertEquals("trace".toLowerCase(), config.getLogLevel().toLowerCase(), "Incorrect Log Level set for TRACE");
+
+        config.setLogLevel("Trace");
+        Assert.assertEquals("trace".toLowerCase(), config.getLogLevel().toLowerCase(), "Incorrect Log Level set for Trace");
+
+
+        try {
+            config.setLogLevel("xxx");
+            Assert.fail("Invalid Log Level was accepted");
+        }
+        catch (ConfigurationException e) {
+            //pass
+        }
+    }
+
+    @Test
+    public void testWaitTime() throws ConfigurationException
+    {
+        Configuration config = new Configuration();
+        int DEFAULT_WAIT_TIME = config.getWaitTime();
+
+        config.setWaitTime(null);
+        Assert.assertEquals(DEFAULT_WAIT_TIME, config.getWaitTime(), "Incorrect wait time set for null");
+
+        config.setWaitTime("60000");
+        Assert.assertEquals(60000, config.getWaitTime(), "Incorrect wait time set for string 60000");
+
+        config.setWaitTime(60000);
+        Assert.assertEquals(60000, config.getWaitTime(), "Incorrect wait time set for int 60000");
+
+        try {
+            config.setWaitTime("xxx");
+            Assert.fail("Invalid wait time xxx was accepted");
+        }
+        catch (ConfigurationException e) {
+            //pass
+        }
+
+        try {
+            config.setWaitTime(-1);
+            Assert.fail("Invalid wait time -1 was accepted");
+        }
+        catch (ConfigurationException e) {
+            //pass
+        }
+    }
+
+    @Test
+    public void testTransactionCount() throws ConfigurationException
+    {
+        Configuration config = new Configuration();
+        int DEFAULT_TRANSACTION_COUNT = config.getTransactionCount();
+
+        config.setTransactionCount(null);
+        Assert.assertEquals(DEFAULT_TRANSACTION_COUNT, config.getTransactionCount(), "Incorrect transaction count set for null");
+
+        config.setTransactionCount("60000");
+        Assert.assertEquals(60000, config.getTransactionCount(), "Incorrect transaction count set for string 60000");
+
+        config.setTransactionCount(60000);
+        Assert.assertEquals(60000, config.getTransactionCount(), "Incorrect transaction count set for int 60000");
+
+        try {
+            config.setTransactionCount("xxx");
+            Assert.fail("Invalid transaction count xxx was accepted");
+        }
+        catch (ConfigurationException e) {
+            //pass
+        }
+
+        try {
+            config.setTransactionCount(-1);
+            Assert.fail("Invalid transaction count -1 was accepted");
+        }
+        catch (ConfigurationException e) {
+            //pass
+        }
+    }
 }
