@@ -6,6 +6,10 @@ import org.apache.commons.cli.*;
  * Created by jakub on 06.03.16.
  */
 public class Configuration {
+    private final int DEFAULT_WAIT_TIME = 60*1000;
+    private final String DEFAULT_LOG_LEVEL = "info";
+    private final int DEFAULT_TRANSACTION_COUNT = 0;
+
     private String aHost;
     private String aPort;
     private String aUsername;
@@ -22,10 +26,10 @@ public class Configuration {
     private int feedMessagesCount = 1000;
     private int feedMessagesSize = 1024;
 
-    private String logLevel = "info";
+    private String logLevel = DEFAULT_LOG_LEVEL;
 
-    private int waitTime = 60*1000;
-    private int transactionCount = 0;
+    private int waitTime = DEFAULT_WAIT_TIME;
+    private int transactionCount = DEFAULT_TRANSACTION_COUNT;
 
     private boolean amqp10Router;
     private int amqp10RouterWaitTime = 0;
@@ -60,31 +64,9 @@ public class Configuration {
             CommandLineParser parser = new DefaultParser();
             CommandLine line = parser.parse(getConfigurationOptions(), args);
 
-            // Configure log level
-            if (line.hasOption("log-level"))
-            {
-                setLogLevel(line.getOptionValue("log-level"));
-            }
-
-            // Configure sleep time
-            if (line.hasOption("wait-time"))
-            {
-                setWaitTime(line.getOptionValue("wait-time"));
-            }
-
-            // Configure transaction count
-            if (line.hasOption("transaction-count"))
-            {
-                String option = line.getOptionValue("transaction-count");
-
-                try {
-                    transactionCount = Integer.parseInt(option);
-                }
-                catch (NumberFormatException e)
-                {
-                    throw new ConfigurationException("--transaction-count option doesn't contain valid integer", e);
-                }
-            }
+            setLogLevel(line.getOptionValue("log-level", null));
+            setWaitTime(line.getOptionValue("wait-time", null));
+            setTransactionCount(line.getOptionValue("transaction-count", null));
 
             // Collect broker details
             setaHost(line.getOptionValue("first-broker-host"));
@@ -540,8 +522,19 @@ public class Configuration {
         return logLevel;
     }
 
-    public void setLogLevel(String logLevel) {
-        this.logLevel = logLevel;
+    public void setLogLevel(String logLevel) throws ConfigurationException {
+        if (logLevel == null)
+        {
+            this.logLevel = DEFAULT_LOG_LEVEL;
+        }
+        else if ("error".equals(logLevel.toLowerCase()) || "warning".equals(logLevel.toLowerCase()) || "info".equals(logLevel.toLowerCase()) || "debug".equals(logLevel.toLowerCase()) || "trace".equals(logLevel.toLowerCase()))
+        {
+            this.logLevel = logLevel.toLowerCase();
+        }
+        else
+        {
+            throw new ConfigurationException("Invalid log level " + logLevel);
+        }
     }
 
     public int getWaitTime() {
@@ -549,8 +542,15 @@ public class Configuration {
     }
 
     public void setWaitTime(String waitTime) throws ConfigurationException {
+        if (waitTime == null)
+        {
+            setWaitTime(DEFAULT_WAIT_TIME);
+            return;
+        }
+
         try {
-            this.waitTime = Integer.parseInt(waitTime);
+            int waitTimeInt = Integer.parseInt(waitTime);
+            setWaitTime(waitTimeInt);
         }
         catch (NumberFormatException e)
         {
@@ -559,15 +559,44 @@ public class Configuration {
     }
 
     public void setWaitTime(int waitTime) throws ConfigurationException {
-        this.waitTime = waitTime;
+        if (waitTime <= 0)
+        {
+            throw new ConfigurationException("Negative --wait-time is not allowed " + waitTime);
+        }
+        else {
+            this.waitTime = waitTime;
+        }
     }
 
     public int getTransactionCount() {
         return transactionCount;
     }
 
-    public void setTransactionCount(int transactionCount) {
-        this.transactionCount = transactionCount;
+    public void setTransactionCount(String transactionCount) throws ConfigurationException {
+        if (transactionCount == null)
+        {
+            setTransactionCount(DEFAULT_TRANSACTION_COUNT);
+            return;
+        }
+
+        try {
+            int transactionCountInt = Integer.parseInt(transactionCount);
+            setTransactionCount(transactionCountInt);
+        }
+        catch (NumberFormatException e)
+        {
+            throw new ConfigurationException("--transaction-count option doesn't contain valid integer", e);
+        }
+    }
+
+    public void setTransactionCount(int transactionCount) throws ConfigurationException {
+        if (transactionCount < 0)
+        {
+            throw new ConfigurationException("Negative --transaction-count is not allowed " + waitTime);
+        }
+        else {
+            this.transactionCount = transactionCount;
+        }
     }
 
     public boolean isAmqp10Router() {
