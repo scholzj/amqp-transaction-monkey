@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/scholzj/amqp-transaction-monkey.svg?branch=master)](https://travis-ci.org/scholzj/amqp-transaction-monkey)
+
 # amqp-transaction-monkey
 
 AMQP Transaction Monkey is utitility for testing of transaction handling in AMQP brokers. It is developed and tested against the Apache Qpid C++ broker (http://qpid.apache.org) 
