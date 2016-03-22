@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/scholzj/amqp-transaction-monkey.svg?branch=master)](https://travis-ci.org/scholzj/amqp-transaction-monkey)
+[![Build Status](https://travis-ci.org/scholzj/amqp-transaction-monkey.svg?branch=master)](https://travis-ci.org/scholzj/amqp-transaction-monkey)  [![Coverage Status](https://coveralls.io/repos/github/scholzj/amqp-transaction-monkey/badge.svg?branch=master)](https://coveralls.io/github/scholzj/amqp-transaction-monkey?branch=master)
 
 # amqp-transaction-monkey
 
