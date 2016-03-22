@@ -115,12 +115,12 @@ public class Configuration {
             setAmqp010RollbackWaitTime(processIntCliOption(line, "amqp010-rollback-wait-time", 0));
 
             // AMQP 0-10 XA routers
-            setXaRouter(line.hasOption("enable-xa-amqp010-routing"));
+            setXaRouter(line.hasOption("enable-amqp010-xa-routing"));
             setXaRouterTransactionGap(processIntCliOption(line, "amqp010-xa-routing-transaction-gap", 0));
             setXaRouterWaitTime(processIntCliOption(line, "amqp010-xa-routing-wait-time", 0));
 
             // AMQP 0-10 XA rollback
-            setXaRollback(line.hasOption("enable-amqp010-xa-routing"));
+            setXaRollback(line.hasOption("enable-amqp010-xa-rollback"));
             setXaRollbackTransactionGap(processIntCliOption(line, "amqp010-xa-rollback-transaction-gap", 0));
             setXaRollbackWaitTime(processIntCliOption(line, "amqp010-xa-rollback-wait-time", 0));
         }
