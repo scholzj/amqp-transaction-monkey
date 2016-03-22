@@ -6,7 +6,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * Created by jakub on 08.03.16.
@@ -139,66 +141,123 @@ public class ConfigurationTest {
     }
 
     @Test
-    public void testWaitTime() throws ConfigurationException
+    public void testProcessInt() throws ConfigurationException
     {
-        Configuration config = new Configuration();
-        int DEFAULT_WAIT_TIME = config.getWaitTime();
+        String[] defaultCli = getRequiredOptions();
+        String[] cli = new String[defaultCli.length+2];
+        System.arraycopy(defaultCli, 0, cli, 0, defaultCli.length);
 
-        config.setWaitTime(null);
-        Assert.assertEquals(DEFAULT_WAIT_TIME, config.getWaitTime(), "Incorrect wait time set for null");
+        int key = defaultCli.length;
+        int val = defaultCli.length+1;
 
-        config.setWaitTime("60000");
-        Assert.assertEquals(60000, config.getWaitTime(), "Incorrect wait time set for string 60000");
+        // Test ineteger
+        cli[key] = "--transaction-count";
+        cli[val] = "60000";
+        new Configuration(cli);
 
-        config.setWaitTime(60000);
-        Assert.assertEquals(60000, config.getWaitTime(), "Incorrect wait time set for int 60000");
-
+        // Test string
         try {
-            config.setWaitTime("xxx");
-            Assert.fail("Invalid wait time xxx was accepted");
+            cli[key] = "--transaction-count";
+            cli[val] = "xxx";
+            new Configuration(cli);
+            Assert.fail("xxx was accepted as integer");
         }
-        catch (ConfigurationException e) {
-            //pass
+        catch (ConfigurationException e)
+        {
+            // pass
         }
 
+        // Test negative value
         try {
-            config.setWaitTime(-1);
-            Assert.fail("Invalid wait time -1 was accepted");
+            cli[key] = "--transaction-count";
+            cli[val] = "-1";
+            new Configuration(cli);
+            Assert.fail("-1 was accepted as non-negative value");
         }
-        catch (ConfigurationException e) {
-            //pass
+        catch (ConfigurationException e)
+        {
+            // pass
         }
     }
 
     @Test
-    public void testTransactionCount() throws ConfigurationException
-    {
-        Configuration config = new Configuration();
-        int DEFAULT_TRANSACTION_COUNT = config.getTransactionCount();
+    public void testAllOptions() throws ConfigurationException {
+        List<String> cli = new ArrayList<>(Arrays.asList(getRequiredOptions()));
+        cli.add("--enable-amqp10-routing");
+        cli.add("--amqp10-routing-wait-time");
+        cli.add("101");
+        cli.add("--amqp10-routing-transaction-gap");
+        cli.add("102");
+        cli.add("--enable-amqp10-rollback");
+        cli.add("--amqp10-rollback-wait-time");
+        cli.add("103");
+        cli.add("--amqp10-rollback-transaction-gap");
+        cli.add("104");
+        cli.add("--enable-amqp010-routing");
+        cli.add("--amqp010-routing-wait-time");
+        cli.add("105");
+        cli.add("--amqp010-routing-transaction-gap");
+        cli.add("106");
+        cli.add("--enable-amqp010-rollback");
+        cli.add("--amqp010-rollback-wait-time");
+        cli.add("107");
+        cli.add("--amqp010-rollback-transaction-gap");
+        cli.add("108");
+        cli.add("--enable-amqp010-xa-routing");
+        cli.add("--amqp010-xa-routing-wait-time");
+        cli.add("109");
+        cli.add("--amqp010-xa-routing-transaction-gap");
+        cli.add("110");
+        cli.add("--enable-amqp010-xa-rollback");
+        cli.add("--amqp010-xa-rollback-wait-time");
+        cli.add("111");
+        cli.add("--amqp010-xa-rollback-transaction-gap");
+        cli.add("112");
+        cli.add("--wait-time");
+        cli.add("113");
+        cli.add("--feed-messages");
+        cli.add("--feed-messages-count");
+        cli.add("115");
+        cli.add("--feed-messages-size");
+        cli.add("116");
+        cli.add("--log-level");
+        cli.add("trace");
 
-        config.setTransactionCount(null);
-        Assert.assertEquals(DEFAULT_TRANSACTION_COUNT, config.getTransactionCount(), "Incorrect transaction count set for null");
+        String[] args = new String[cli.size()];
+        cli.toArray(args);
 
-        config.setTransactionCount("60000");
-        Assert.assertEquals(60000, config.getTransactionCount(), "Incorrect transaction count set for string 60000");
+        Configuration config = new Configuration(args);
 
-        config.setTransactionCount(60000);
-        Assert.assertEquals(60000, config.getTransactionCount(), "Incorrect transaction count set for int 60000");
+        Assert.assertEquals(config.isAmqp10Router(), true, "AMQP 1.0 router is not enabled");
+        Assert.assertEquals(config.getAmqp10RouterWaitTime(), 101, "AMQP 1.0 router wait time does not match");
+        Assert.assertEquals(config.getAmqp10RouterTransactionGap(), 102, "AMQP 1.0 router transaction gap does not match");
 
-        try {
-            config.setTransactionCount("xxx");
-            Assert.fail("Invalid transaction count xxx was accepted");
-        }
-        catch (ConfigurationException e) {
-            //pass
-        }
+        Assert.assertEquals(config.isAmqp10Rollback(), true, "AMQP 1.0 rollback is not enabled");
+        Assert.assertEquals(config.getAmqp10RollbackWaitTime(), 103, "AMQP 1.0 rollback wait time does not match");
+        Assert.assertEquals(config.getAmqp10RollbackTransactionGap(), 104, "AMQP 1.0 rollback transaction gap does not match");
 
-        try {
-            config.setTransactionCount(-1);
-            Assert.fail("Invalid transaction count -1 was accepted");
-        }
-        catch (ConfigurationException e) {
-            //pass
-        }
+        Assert.assertEquals(config.isAmqp010Router(), true, "AMQP 0-10 router is not enabled");
+        Assert.assertEquals(config.getAmqp010RouterWaitTime(), 105, "AMQP 0-10 router wait time does not match");
+        Assert.assertEquals(config.getAmqp010RouterTransactionGap(), 106, "AMQP 0-10 router transaction gap does not match");
+
+        Assert.assertEquals(config.isAmqp010Rollback(), true, "AMQP 0-10 rollback is not enabled");
+        Assert.assertEquals(config.getAmqp010RollbackWaitTime(), 107, "AMQP 0-10 rollback wait time does not match");
+        Assert.assertEquals(config.getAmqp010RollbackTransactionGap(), 108, "AMQP 0-10 rollback transaction gap does not match");
+
+        Assert.assertEquals(config.isXaRouter(), true, "AMQP 0-10 XA router is not enabled");
+        Assert.assertEquals(config.getXaRouterWaitTime(), 109, "AMQP 0-10 XA router wait time does not match");
+        Assert.assertEquals(config.getXaRouterTransactionGap(), 110, "AMQP 0-10 XA router transaction gap does not match");
+
+        Assert.assertEquals(config.isXaRollback(), true, "AMQP 0-10 XA rollback is not enabled");
+        Assert.assertEquals(config.getXaRollbackWaitTime(), 111, "AMQP 0-10 XA rollback wait time does not match");
+        Assert.assertEquals(config.getXaRollbackTransactionGap(), 112, "AMQP 0-10 XA rollback transaction gap does not match");
+
+        Assert.assertEquals(config.getWaitTime(), 113, "Wait time does not match");
+
+        Assert.assertEquals(config.isFeedMessages(), true, "Feeding of messages is not enabled");
+        Assert.assertEquals(config.getFeedMessagesCount(), 115, "Feeding message count does not match");
+        Assert.assertEquals(config.getFeedMessagesSize(), 116, "Feeding message size does not match");
+
+        Assert.assertEquals(config.getLogLevel(), "trace", "Log level does not match");
     }
 }
