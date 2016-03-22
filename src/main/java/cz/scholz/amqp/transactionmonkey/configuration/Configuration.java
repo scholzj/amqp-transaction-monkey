@@ -6,10 +6,14 @@ import org.apache.commons.cli.*;
  * Created by jakub on 06.03.16.
  */
 public class Configuration {
+    // Defaults
     private final int DEFAULT_WAIT_TIME = 60*1000;
     private final String DEFAULT_LOG_LEVEL = "info";
     private final int DEFAULT_TRANSACTION_COUNT = 0;
+    private final int DEFAULT_FEED_MESSAGES_COUNT = 1000;
+    private final int DEFAULT_FEED_MESSAGES_SIZE = 1024;
 
+    // Values
     private String aHost;
     private String aPort;
     private String aUsername;
@@ -23,8 +27,8 @@ public class Configuration {
     private String bQueue;
 
     private boolean feedMessages = false;
-    private int feedMessagesCount = 1000;
-    private int feedMessagesSize = 1024;
+    private int feedMessagesCount = DEFAULT_FEED_MESSAGES_COUNT;
+    private int feedMessagesSize = DEFAULT_FEED_MESSAGES_SIZE;
 
     private String logLevel = DEFAULT_LOG_LEVEL;
 
@@ -64,10 +68,6 @@ public class Configuration {
             CommandLineParser parser = new DefaultParser();
             CommandLine line = parser.parse(getConfigurationOptions(), args);
 
-            setLogLevel(line.getOptionValue("log-level", null));
-            setWaitTime(line.getOptionValue("wait-time", null));
-            setTransactionCount(line.getOptionValue("transaction-count", null));
-
             // Collect broker details
             setaHost(line.getOptionValue("first-broker-host"));
             setaPort(line.getOptionValue("first-broker-port"));
@@ -80,236 +80,49 @@ public class Configuration {
             setbPassword(line.getOptionValue("second-broker-password", null));
             setbQueue(line.getOptionValue("second-broker-queue"));
 
+            // Log level
+            setLogLevel(line.getOptionValue("log-level", null));
+
+            // Wait time
+            setWaitTime(processIntCliOption(line, "wait-time", DEFAULT_WAIT_TIME));
+
+            // Transaction time
+            setTransactionCount(processIntCliOption(line, "transaction-count", DEFAULT_TRANSACTION_COUNT));
+
             // Feed messages
-            if (line.hasOption("feed-messages"))
-            {
-                feedMessages = true;
+            setFeedMessages(line.hasOption("feed-messages"));
+            setFeedMessagesCount(processIntCliOption(line, "feed-messages-count", DEFAULT_FEED_MESSAGES_COUNT));
+            setFeedMessagesSize(processIntCliOption(line, "feed-messages-size", DEFAULT_FEED_MESSAGES_SIZE));
 
-                if (line.hasOption("feed-messages-count"))
-                {
-                    String option = line.getOptionValue("feed-messages-count");
-
-                    try {
-                        feedMessagesCount = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--feed-messages-count option doesn't contain valid integer", e);
-                    }
-                }
-
-                if (line.hasOption("feed-messages-size"))
-                {
-                    String option = line.getOptionValue("feed-messages-size");
-
-                    try {
-                        feedMessagesSize = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--feed-messages-size option doesn't contain valid integer", e);
-                    }
-                }
-            }
-
-            // Create the routers
             // AMQP 1.0 routers
-            if (line.hasOption("enable-amqp10-routing")) {
-                amqp10Router = true;
-
-                // Wait time
-                if (line.hasOption("amqp10-routing-wait-time"))
-                {
-                    String option = line.getOptionValue("amqp10-routing-wait-time");
-
-                    try {
-                        amqp10RouterWaitTime = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--amqp10-routing-wait-time option doesn't contain valid integer", e);
-                    }
-                }
-
-                // Gap time
-                if (line.hasOption("amqp10-routing-transaction-gap"))
-                {
-                    String option = line.getOptionValue("amqp10-routing-transaction-gap");
-
-                    try {
-                        amqp10RouterTransactionGap = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--amqp10-routing-transaction-gap option doesn't contain valid integer", e);
-                    }
-                }
-            }
+            setAmqp10Router(line.hasOption("enable-amqp10-routing"));
+            setAmqp10RouterTransactionGap(processIntCliOption(line, "amqp10-routing-transaction-gap", 0));
+            setAmqp10RouterWaitTime(processIntCliOption(line, "amqp10-routing-wait-time", 0));
 
             // AMQP 1.0 rollback
-            if (line.hasOption("enable-amqp10-rollback")) {
-                amqp10Rollback = true;
-
-                // Wait time
-                if (line.hasOption("amqp10-rollback-wait-time"))
-                {
-                    String option = line.getOptionValue("amqp10-rollback-wait-time");
-
-                    try {
-                        amqp10RollbackWaitTime = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--amqp10-rollback-wait-time option doesn't contain valid integer", e);
-                    }
-                }
-
-                // Gap time
-                if (line.hasOption("amqp10-rollback-transaction-gap"))
-                {
-                    String option = line.getOptionValue("amqp10-rollback-transaction-gap");
-
-                    try {
-                        amqp10RollbackTransactionGap = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--amqp10-rollback-transaction-gap option doesn't contain valid integer", e);
-                    }
-                }
-            }
+            setAmqp10Rollback(line.hasOption("enable-amqp10-routing"));
+            setAmqp10RollbackTransactionGap(processIntCliOption(line, "amqp10-rollback-transaction-gap", 0));
+            setAmqp10RollbackWaitTime(processIntCliOption(line, "amqp10-rollback-wait-time", 0));
 
             // AMQP 0-10 routers
-            if (line.hasOption("enable-amqp010-routing")) {
-                amqp010Router = true;
-
-                // Wait time
-                if (line.hasOption("amqp010-routing-wait-time"))
-                {
-                    String option = line.getOptionValue("amqp010-routing-wait-time");
-
-                    try {
-                        amqp010RouterWaitTime = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--amqp010-routing-wait-time option doesn't contain valid integer", e);
-                    }
-                }
-
-                // Gap time
-                if (line.hasOption("amqp010-routing-transaction-gap"))
-                {
-                    String option = line.getOptionValue("amqp010-routing-transaction-gap");
-
-                    try {
-                        amqp010RouterTransactionGap = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--amqp010-routing-transaction-gap option doesn't contain valid integer", e);
-                    }
-                }
-            }
+            setAmqp010Router(line.hasOption("enable-amqp010-routing"));
+            setAmqp010RouterTransactionGap(processIntCliOption(line, "amqp010-routing-transaction-gap", 0));
+            setAmqp010RouterWaitTime(processIntCliOption(line, "amqp010-routing-wait-time", 0));
 
             // AMQP 0-10 rollback
-            if (line.hasOption("enable-amqp010-rollback")) {
-                amqp010Rollback = true;
+            setAmqp010Rollback(line.hasOption("enable-amqp010-routing"));
+            setAmqp010RollbackTransactionGap(processIntCliOption(line, "amqp010-rollback-transaction-gap", 0));
+            setAmqp010RollbackWaitTime(processIntCliOption(line, "amqp010-rollback-wait-time", 0));
 
-                // Wait time
-                if (line.hasOption("amqp010-rollback-wait-time"))
-                {
-                    String option = line.getOptionValue("amqp010-rollback-wait-time");
-
-                    try {
-                        amqp010RollbackWaitTime = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--amqp010-rollback-wait-time option doesn't contain valid integer", e);
-                    }
-                }
-
-                // Gap time
-                if (line.hasOption("amqp010-rollback-transaction-gap"))
-                {
-                    String option = line.getOptionValue("amqp010-rollback-transaction-gap");
-
-                    try {
-                        amqp010RollbackTransactionGap = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--amqp010-rollback-transaction-gap option doesn't contain valid integer", e);
-                    }
-                }
-            }
-
-            // AMQP 0-10 XA router
-            if (line.hasOption("enable-amqp010-xa-routing")) {
-                xaRouter = true;
-
-                // Wait time
-                if (line.hasOption("amqp010-xa-routing-wait-time"))
-                {
-                    String option = line.getOptionValue("amqp010-xa-routing-wait-time");
-
-                    try {
-                        xaRouterWaitTime = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--amqp010-xa-routing-wait-time option doesn't contain valid integer", e);
-                    }
-                }
-
-                // Gap time
-                if (line.hasOption("amqp010-xa-routing-transaction-gap"))
-                {
-                    String option = line.getOptionValue("amqp010-xa-routing-transaction-gap");
-
-                    try {
-                        xaRouterTransactionGap = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--amqp010-xa-routing-transaction-gap option doesn't contain valid integer", e);
-                    }
-                }
-            }
+            // AMQP 0-10 XA routers
+            setXaRouter(line.hasOption("enable-xa-amqp010-routing"));
+            setXaRouterTransactionGap(processIntCliOption(line, "amqp010-xa-routing-transaction-gap", 0));
+            setXaRouterWaitTime(processIntCliOption(line, "amqp010-xa-routing-wait-time", 0));
 
             // AMQP 0-10 XA rollback
-            if (line.hasOption("enable-amqp010-xa-rollback")) {
-                xaRollback = true;
-
-                // Wait time
-                if (line.hasOption("amqp010-xa-rollback-wait-time"))
-                {
-                    String option = line.getOptionValue("amqp010-xa-rollback-wait-time");
-
-                    try {
-                        xaRollbackWaitTime = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--amqp010-xa-rollback-wait-time option doesn't contain valid integer", e);
-                    }
-                }
-
-                // Gap time
-                if (line.hasOption("amqp010-xa-rollback-transaction-gap"))
-                {
-                    String option = line.getOptionValue("amqp010-xa-rollback-transaction-gap");
-
-                    try {
-                        xaRollbackTransactionGap = Integer.parseInt(option);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        throw new ConfigurationException("--amqp010-xa-rollback-transaction-gap option doesn't contain valid integer", e);
-                    }
-                }
-            }
+            setXaRollback(line.hasOption("enable-amqp010-xa-routing"));
+            setXaRollbackTransactionGap(processIntCliOption(line, "amqp010-xa-rollback-transaction-gap", 0));
+            setXaRollbackWaitTime(processIntCliOption(line, "amqp010-xa-rollback-wait-time", 0));
         }
         catch (ParseException e)
         {
@@ -373,6 +186,32 @@ public class Configuration {
         opts.addOption(Option.builder().longOpt("help").desc("Show this help").build());
 
         return opts;
+    }
+
+    private int processIntCliOption(CommandLine line, String option, int defaultValue) throws ConfigurationException
+    {
+        String value = line.getOptionValue(option, null);
+
+        if (value == null)
+        {
+            return defaultValue;
+        }
+
+        try {
+            int intValue = Integer.parseInt(value);
+            return intValue;
+        }
+        catch (NumberFormatException e)
+        {
+            throw new ConfigurationException("--" + option + " option doesn't contain valid integer", e);
+        }
+    }
+
+    private void validateNonNegtive(String option, int value) throws ConfigurationException {
+        if (value < 0)
+        {
+            throw new ConfigurationException("--" + option + " has to be non-negative integer!");
+        }
     }
 
     public static void printHelp()
@@ -506,16 +345,18 @@ public class Configuration {
         return feedMessagesCount;
     }
 
-    public void setFeedMessagesCount(int feedMessagesCount) {
+    public void setFeedMessagesCount(int feedMessagesCount) throws ConfigurationException {
+        validateNonNegtive("feed-messages-count", feedMessagesCount);
         this.feedMessagesCount = feedMessagesCount;
+    }
+
+    public void setFeedMessagesSize(int feedMessagesSize) throws ConfigurationException {
+        validateNonNegtive("feed-messages-size", feedMessagesSize);
+        this.feedMessagesSize = feedMessagesSize;
     }
 
     public int getFeedMessagesSize() {
         return feedMessagesSize;
-    }
-
-    public void setFeedMessagesSize(int feedMessagesSize) {
-        this.feedMessagesSize = feedMessagesSize;
     }
 
     public String getLogLevel() {
@@ -541,62 +382,18 @@ public class Configuration {
         return waitTime;
     }
 
-    public void setWaitTime(String waitTime) throws ConfigurationException {
-        if (waitTime == null)
-        {
-            setWaitTime(DEFAULT_WAIT_TIME);
-            return;
-        }
-
-        try {
-            int waitTimeInt = Integer.parseInt(waitTime);
-            setWaitTime(waitTimeInt);
-        }
-        catch (NumberFormatException e)
-        {
-            throw new ConfigurationException("--wait-time option doesn't contain valid integer", e);
-        }
-    }
-
     public void setWaitTime(int waitTime) throws ConfigurationException {
-        if (waitTime <= 0)
-        {
-            throw new ConfigurationException("Negative --wait-time is not allowed " + waitTime);
-        }
-        else {
-            this.waitTime = waitTime;
-        }
+        validateNonNegtive("wait-time", waitTime);
+        this.waitTime = waitTime;
     }
 
     public int getTransactionCount() {
         return transactionCount;
     }
 
-    public void setTransactionCount(String transactionCount) throws ConfigurationException {
-        if (transactionCount == null)
-        {
-            setTransactionCount(DEFAULT_TRANSACTION_COUNT);
-            return;
-        }
-
-        try {
-            int transactionCountInt = Integer.parseInt(transactionCount);
-            setTransactionCount(transactionCountInt);
-        }
-        catch (NumberFormatException e)
-        {
-            throw new ConfigurationException("--transaction-count option doesn't contain valid integer", e);
-        }
-    }
-
     public void setTransactionCount(int transactionCount) throws ConfigurationException {
-        if (transactionCount < 0)
-        {
-            throw new ConfigurationException("Negative --transaction-count is not allowed " + waitTime);
-        }
-        else {
-            this.transactionCount = transactionCount;
-        }
+        validateNonNegtive("transaction-count", transactionCount);
+        this.transactionCount = transactionCount;
     }
 
     public boolean isAmqp10Router() {
@@ -611,7 +408,8 @@ public class Configuration {
         return amqp10RouterWaitTime;
     }
 
-    public void setAmqp10RouterWaitTime(int amqp10RouterWaitTime) {
+    public void setAmqp10RouterWaitTime(int amqp10RouterWaitTime) throws ConfigurationException {
+        validateNonNegtive("amqp10-routing-wait-time", amqp10RouterWaitTime);
         this.amqp10RouterWaitTime = amqp10RouterWaitTime;
     }
 
@@ -619,7 +417,8 @@ public class Configuration {
         return amqp10RouterTransactionGap;
     }
 
-    public void setAmqp10RouterTransactionGap(int amqp10RouterTransactionGap) {
+    public void setAmqp10RouterTransactionGap(int amqp10RouterTransactionGap) throws ConfigurationException {
+        validateNonNegtive("amqp10-routing-transaction-gap", amqp10RouterTransactionGap);
         this.amqp10RouterTransactionGap = amqp10RouterTransactionGap;
     }
 
@@ -635,7 +434,8 @@ public class Configuration {
         return amqp10RollbackWaitTime;
     }
 
-    public void setAmqp10RollbackWaitTime(int amqp10RollbackWaitTime) {
+    public void setAmqp10RollbackWaitTime(int amqp10RollbackWaitTime) throws ConfigurationException {
+        validateNonNegtive("amqp10-rollback-wait-time", amqp10RollbackWaitTime);
         this.amqp10RollbackWaitTime = amqp10RollbackWaitTime;
     }
 
@@ -643,7 +443,8 @@ public class Configuration {
         return amqp10RollbackTransactionGap;
     }
 
-    public void setAmqp10RollbackTransactionGap(int amqp10RollbackTransactionGap) {
+    public void setAmqp10RollbackTransactionGap(int amqp10RollbackTransactionGap) throws ConfigurationException {
+        validateNonNegtive("amqp10-rollback-transaction-gap", amqp10RollbackTransactionGap);
         this.amqp10RollbackTransactionGap = amqp10RollbackTransactionGap;
     }
 
@@ -659,7 +460,8 @@ public class Configuration {
         return amqp010RouterWaitTime;
     }
 
-    public void setAmqp010RouterWaitTime(int amqp010RouterWaitTime) {
+    public void setAmqp010RouterWaitTime(int amqp010RouterWaitTime) throws ConfigurationException {
+        validateNonNegtive("amqp010-routing-wait-time", amqp010RouterWaitTime);
         this.amqp010RouterWaitTime = amqp010RouterWaitTime;
     }
 
@@ -667,7 +469,8 @@ public class Configuration {
         return amqp010RouterTransactionGap;
     }
 
-    public void setAmqp010RouterTransactionGap(int amqp010RouterTransactionGap) {
+    public void setAmqp010RouterTransactionGap(int amqp010RouterTransactionGap) throws ConfigurationException {
+        validateNonNegtive("amqp010-routing-transaction-gap", amqp010RouterTransactionGap);
         this.amqp010RouterTransactionGap = amqp010RouterTransactionGap;
     }
 
@@ -683,7 +486,8 @@ public class Configuration {
         return amqp010RollbackWaitTime;
     }
 
-    public void setAmqp010RollbackWaitTime(int amqp010RollbackWaitTime) {
+    public void setAmqp010RollbackWaitTime(int amqp010RollbackWaitTime) throws ConfigurationException {
+        validateNonNegtive("amqp010-rollback-wait-time", amqp010RollbackWaitTime);
         this.amqp010RollbackWaitTime = amqp010RollbackWaitTime;
     }
 
@@ -691,7 +495,8 @@ public class Configuration {
         return amqp010RollbackTransactionGap;
     }
 
-    public void setAmqp010RollbackTransactionGap(int amqp010RollbackTransactionGap) {
+    public void setAmqp010RollbackTransactionGap(int amqp010RollbackTransactionGap) throws ConfigurationException {
+        validateNonNegtive("amqp010-rollback-transaction-gap", amqp010RollbackTransactionGap);
         this.amqp010RollbackTransactionGap = amqp010RollbackTransactionGap;
     }
 
@@ -707,7 +512,8 @@ public class Configuration {
         return xaRouterWaitTime;
     }
 
-    public void setXaRouterWaitTime(int xaRouterWaitTime) {
+    public void setXaRouterWaitTime(int xaRouterWaitTime) throws ConfigurationException {
+        validateNonNegtive("amqp010-xa-routing-wait-time", xaRouterWaitTime);
         this.xaRouterWaitTime = xaRouterWaitTime;
     }
 
@@ -715,7 +521,8 @@ public class Configuration {
         return xaRouterTransactionGap;
     }
 
-    public void setXaRouterTransactionGap(int xaRouterTransactionGap) {
+    public void setXaRouterTransactionGap(int xaRouterTransactionGap) throws ConfigurationException {
+        validateNonNegtive("amqp010-xa-routing-transaction-gap", xaRouterTransactionGap);
         this.xaRouterTransactionGap = xaRouterTransactionGap;
     }
 
@@ -731,7 +538,8 @@ public class Configuration {
         return xaRollbackWaitTime;
     }
 
-    public void setXaRollbackWaitTime(int xaRollbackWaitTime) {
+    public void setXaRollbackWaitTime(int xaRollbackWaitTime) throws ConfigurationException {
+        validateNonNegtive("amqp010-xa-rollback-wait-time", xaRollbackWaitTime);
         this.xaRollbackWaitTime = xaRollbackWaitTime;
     }
 
@@ -739,7 +547,8 @@ public class Configuration {
         return xaRollbackTransactionGap;
     }
 
-    public void setXaRollbackTransactionGap(int xaRollbackTransactionGap) {
+    public void setXaRollbackTransactionGap(int xaRollbackTransactionGap) throws ConfigurationException {
+        validateNonNegtive("amqp010-xa-rollback-transaction-gap", xaRollbackTransactionGap);
         this.xaRollbackTransactionGap = xaRollbackTransactionGap;
     }
 }
